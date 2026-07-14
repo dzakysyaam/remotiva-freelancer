@@ -1,200 +1,76 @@
-PONYTAIL MODE — REMOTIVA SERVICE CARD + ROUTE FIX
+# Remotiva — Professional Freelance Marketplace
 
-Role:
-You are a senior React + Golang full-stack developer. Work carefully, inspect the project first, then fix without breaking existing features.
+Remotiva is a web-based freelance marketplace platform designed to connect clients with skilled freelancers for digital services. The platform provides service discovery, category browsing, authentication, order management, saved services, messaging, and user profile management.
 
-Context:
-Remotiva is a freelance marketplace website inspired by Fiverr and Upwork, but must stay original. Do not copy Fiverr HTML/classes/assets directly. Use the Fiverr gig card structure only as UI reference.
+The project is built with a modern full-stack architecture using React for the frontend, Go for the backend API, and MySQL as the relational database.
 
-Main tasks:
+---
 
-1. Fix Featured Services / Popular Services cards
-Current cards still look mobile. Redesign them into desktop marketplace gig cards similar in proportion to Fiverr cards.
+## Overview
 
-Card structure:
-- top image thumbnail with fixed aspect ratio
-- favorite button top right
-- seller row with avatar, name, level/badge
-- service title
-- rating row
-- price row: "Mulai dari Rp..."
-- delivery time
-- optional video consultation/payment badge if useful
+Remotiva is inspired by professional freelance marketplace platforms such as Fiverr and Upwork, while maintaining its own original product direction, interface, and system flow.
 
-Desktop card behavior:
-- container max-width around 1400px
-- grid: repeat(auto-fill, minmax(260px, 1fr))
-- gap 24px
-- card width around 260-310px
-- image ratio around 16:10 or 4:3
-- no mobile tall card look on desktop
-- clean hover state
-- consistent border/radius/shadow
-- clickable whole card
+The application focuses on providing a clean marketplace experience, including:
 
-Do not use giant mobile card sections.
-Do not overuse gradients.
-Do not use emoji.
-Use clean SVG icons.
+- Service discovery by category
+- Professional service listing cards
+- Freelancer and service details
+- User authentication using JWT
+- Saved services
+- Order management
+- Profile and preference management
+- Responsive user interface
 
-2. Fix broken category icons
-Current icons show broken encoding like â-#. Replace with proper inline SVG icons or local icon components.
-Use consistent style icons.
-Suggested icons:
-- design
-- marketing
-- writing
-- video
-- programming
-- data
-- business
-- finance
+---
 
-3. Make color palette blue
-Use Remotiva blue palette and keep it professional.
+## Tech Stack
 
-Use CSS variables like:
-:root {
-  --primary: #2f78f6;
-  --primary-dark: #1f5ed8;
-  --primary-soft: #e8f1ff;
-  --bg: #f6f9ff;
-  --surface: #ffffff;
-  --text: #0b1f3a;
-  --muted: #64748b;
-  --border: #dbe5f3;
-  --warning: #ffb020;
-  --success: #16a34a;
-}
+| Layer | Technology |
+|---|---|
+| Frontend | React, Vite, React Router |
+| UI Icons | Lucide React Icons |
+| Backend | Go `net/http` |
+| Database | MySQL |
+| Authentication | JWT |
+| Architecture | Clean Layered Architecture |
+| Database Name | `remotiva_db` |
 
-Apply blue accent to:
-- navbar CTA
-- search button
-- active category
-- card hover border
-- buttons
-- badges
+---
 
-4. Fix card click detail route
-When clicking service card, this URL must work:
-http://localhost:5173/app/services/2
+## Project Structure
 
-Check React Router setup.
-Ensure route exists:
-<Route path="/app/services/:id" element={<ServiceDetail />} />
-
-Check ServiceDetail:
-- read id from useParams()
-- fetch service by id from API or local state
-- handle loading, error, not found
-- render service title, image, seller, rating, price, description, checkout CTA
-
-If backend has endpoint:
-GET /api/services/:id
-use it.
-
-If not, add backend route safely:
-GET /api/services/{id}
-
-Do not leave blank page. If data not found, show proper empty state:
-"Service tidak ditemukan"
-
-5. Add navigation back to home
-Add clear home navigation:
-- navbar logo links to "/"
-- Home menu links to "/"
-- Marketplace menu links to "/app"
-- Services links to "/app/services"
-- On detail page add breadcrumb:
-Home / Services / Service Detail
-- Add "Kembali ke marketplace" link
-
-6. Navbar redesign
-Make navbar closer to professional marketplace style:
-- larger desktop navbar
-- left logo Remotiva
-- center search bar
-- category/nav links
-- right actions: Become a Seller, Sign in/Profile
-- sticky top optional
-- border bottom
-- clear spacing
-- desktop-first, responsive on mobile
-
-Do not make navbar tiny.
-Do not make it mobile-first.
-
-7. Add professional service images
-Cards must not be blank.
-Use local professional thumbnails or generated placeholders per category:
-- logo/design
-- website development
-- marketing
-- video editing
-- writing
-- data dashboard
-- business consulting
-- finance
-
-Store assets locally under:
-frontend/public/assets/services/
-
-Use consistent image sizes and object-fit: cover.
-No external hotlink images.
-No Fiverr assets.
-
-8. Payment entry from service detail
-On service detail page, add CTA:
-"Pesan Sekarang"
-
-Click should go to:
-/app/checkout/:serviceId
-
-Checkout page should show:
-- service summary
-- seller
-- price
-- platform fee if available
-- total payment
-- payment method options:
-  - Virtual Account
-  - Bank Transfer
-  - E-Wallet
-  - Card Mock
-- button "Bayar Sekarang"
-
-If payment backend already exists, connect it.
-If not, create a clean simulated payment:
-status: pending, paid, failed, cancelled.
-
-9. Code quality
-Use senior developer style:
-- clean components
-- concise naming
-- reusable ServiceCard component
-- no excessive comments
-- no dead code
-- no unused imports
-- do not duplicate card JSX
-- do not break login/register
-- do not break existing API
-- keep VITE_API_URL
-
-Suggested components:
-src/components/marketplace/GigCard.jsx
-src/components/marketplace/CategoryCard.jsx
-src/components/layout/Navbar.jsx
-src/pages/ServiceDetail.jsx
-src/pages/Checkout.jsx
-
-10. Final checks
-Before finishing, verify:
-- npm run dev works
-- go run ./cmd/api works
-- /api/health works
-- /app/services/2 shows detail page
-- clicking service card works
-- navbar home link works
-- featured card is desktop-style
-- blue palette applied
-- mobile remains responsive
+```bash
+remotiva/
+├── backend/
+│   ├── cmd/
+│   │   └── api/
+│   │       └── main.go
+│   └── internal/
+│       ├── config/
+│       ├── db/
+│       ├── domain/
+│       ├── http/
+│       ├── repository/
+│       └── security/
+│
+├── frontend/
+│   ├── public/
+│   │   └── assets/
+│   └── src/
+│       ├── components/
+│       │   ├── layout/
+│       │   ├── marketplace/
+│       │   └── ui/
+│       ├── lib/
+│       └── pages/
+│
+├── database/
+│   ├── schema.sql
+│   └── seed.sql
+│
+├── docs/
+│   └── PRD.md
+│
+├── docker-compose.yml
+├── README.md
+└── PRD.md
