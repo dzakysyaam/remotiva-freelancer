@@ -32,10 +32,10 @@ export default function Login() {
       <div className="auth-left">
         <div className="auth-brand">
           <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
-            <rect width="32" height="32" rx="8" fill="white"/>
-            <path d="M8 16L14 22L24 10" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect width="32" height="32" rx="6" fill="white"/>
+            <path d="M8 16L14 22L24 10" stroke="#1dbf73" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Remotiva
+          remotiva
         </div>
         <div className="auth-left-content">
           <h1>Welcome back to Remotiva</h1>
@@ -95,10 +95,10 @@ export default function Login() {
             <button
               type="submit"
               className="btn btn-primary btn-lg"
-              style={{ width: '100%', marginTop: '8px' }}
+              style={{ width: '100%', marginTop: '8px', background: '#1dbf73' }}
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Signing in...' : 'Continue'}
             </button>
           </form>
 

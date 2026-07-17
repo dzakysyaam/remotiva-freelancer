@@ -27,7 +27,7 @@ export default function SavedPage() {
     <div className="dashboard-layout">
       <div className="dashboard-header">
         <h1>Saved Services</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Your favorite services in one place</p>
+        <p>Your favorite services in one place</p>
       </div>
 
       {loading ? (
@@ -37,7 +37,7 @@ export default function SavedPage() {
       ) : items.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">
-            <Heart size={48} />
+            <Heart size={32} />
           </div>
           <h2>No saved services yet</h2>
           <p>Save services you like to compare them later and easily find them again.</p>
@@ -46,16 +46,17 @@ export default function SavedPage() {
       ) : (
         <div className="services-grid">
           {items.map(item => (
-            <div key={item.id} className="service-card" style={{ position: 'relative' }}>
+            <div key={item.id} className="gig-card" style={{ position: 'relative' }}>
               <button
                 onClick={() => handleRemove(item.id)}
                 style={{
                   position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  width: '36px',
-                  height: '36px',
-                  background: 'rgba(255,255,255,0.95)',
+                  top: '10px',
+                  right: '10px',
+                  width: '34px',
+                  height: '34px',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(4px)',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -63,34 +64,35 @@ export default function SavedPage() {
                   zIndex: 10,
                   cursor: 'pointer',
                   border: 'none',
-                  color: 'var(--text-secondary)'
+                  color: '#e74c3c'
                 }}
               >
                 <Trash2 size={16} />
               </button>
               <Link to={`/app/services/${item.id}`} style={{ display: 'block' }}>
-                <div className="service-image">
+                <div className="gig-card-image">
                   <img src={item.image_url || '/assets/home-2.jpg'} alt={item.title} />
                 </div>
-                <div className="service-content">
-                  <div className="service-seller">
-                    <div className="service-avatar">
+                <div className="gig-card-content">
+                  <div className="gig-card-seller">
+                    <div className="gig-card-seller-avatar">
                       {item.seller_name?.[0]?.toUpperCase() || 'S'}
                     </div>
-                    <div className="service-seller-info">
-                      <div className="service-seller-name">{item.seller_name}</div>
-                      <div className="service-seller-level">{item.seller_level}</div>
-                    </div>
-                    <div className="service-rating">
-                      <Star size={14} fill="currentColor" />
-                      {Number(item.rating || 0).toFixed(1)}
+                    <div className="gig-card-seller-info">
+                      <span className="gig-card-seller-name">{item.seller_name}</span>
+                      <span className="gig-card-seller-level">{item.seller_level}</span>
                     </div>
                   </div>
-                  <h3 className="service-title">{item.title}</h3>
-                  <div className="service-footer">
-                    <div>
-                      <div className="service-price-label">Starting at</div>
-                      <div className="service-price">Rp{Number(item.price || 0).toLocaleString('id-ID')}</div>
+                  <h3 className="gig-card-title">{item.title}</h3>
+                  <div className="gig-card-rating">
+                    <Star size={14} fill="#ffb800" color="#ffb800" />
+                    <span className="rating-value">{Number(item.rating || 0).toFixed(1)}</span>
+                    <span className="rating-count">(99)</span>
+                  </div>
+                  <div className="gig-card-footer">
+                    <div className="gig-card-price">
+                      <span className="price-label">From</span>
+                      <span className="price-value">Rp{Number(item.price || 0).toLocaleString('id-ID')}</span>
                     </div>
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Package, Clock, CheckCircle, XCircle, Plus } from 'lucide-react'
+import { Package, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { api } from '../lib/api'
 
 export default function OrdersPage() {
@@ -55,26 +55,26 @@ export default function OrdersPage() {
     <div className="dashboard-layout">
       <div className="dashboard-header">
         <h1>My Orders</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Manage your orders and track progress</p>
+        <p>Manage your orders and track progress</p>
       </div>
 
       {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
           <h4>Total Orders</h4>
-          <div className="value">{stats.total}</div>
+          <div className="stat-value">{stats.total}</div>
         </div>
         <div className="stat-card">
           <h4>Pending</h4>
-          <div className="value" style={{ color: 'var(--warning)' }}>{stats.pending}</div>
+          <div className="stat-value" style={{ color: '#f59e0b' }}>{stats.pending}</div>
         </div>
         <div className="stat-card">
           <h4>In Progress</h4>
-          <div className="value" style={{ color: 'var(--primary)' }}>{stats.inProgress}</div>
+          <div className="stat-value" style={{ color: 'var(--primary)' }}>{stats.inProgress}</div>
         </div>
         <div className="stat-card">
           <h4>Completed</h4>
-          <div className="value" style={{ color: 'var(--success)' }}>{stats.completed}</div>
+          <div className="stat-value" style={{ color: '#1dbf73' }}>{stats.completed}</div>
         </div>
       </div>
 
@@ -95,7 +95,7 @@ export default function OrdersPage() {
         ) : orders.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">
-              <Package size={48} />
+              <Package size={32} />
             </div>
             <h2>No orders yet</h2>
             <p>Start by exploring our services and placing your first order.</p>

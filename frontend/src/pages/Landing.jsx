@@ -39,7 +39,7 @@ export default function Landing() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button type="submit">
-              <Search size={20} />
+              <Search size={18} />
               Search
             </button>
           </form>
@@ -50,20 +50,20 @@ export default function Landing() {
       <section className="section">
         <div className="section-header">
           <h2>Popular Categories</h2>
-          <Link to="/app/search">View all</Link>
+          <Link to="/app/search">View all <ArrowRight size={16} /></Link>
         </div>
         <div className="categories-grid">
-          {categories.slice(0, 8).map(cat => (
+          {categories.slice(0, 6).map(cat => (
             <CategoryCard key={cat.id} category={cat} />
           ))}
         </div>
       </section>
 
       {/* Featured Services */}
-      <section className="section" style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+      <section className="section" style={{ background: '#f5f7fa', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="section-header">
           <h2>Featured Services</h2>
-          <Link to="/app/search">View all</Link>
+          <Link to="/app/search">View all <ArrowRight size={16} /></Link>
         </div>
         <div className="services-grid">
           {services.map(service => (
@@ -73,10 +73,10 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="section how-it-works">
+      <section className="how-it-works">
         <div className="section-header" style={{ justifyContent: 'center', textAlign: 'center' }}>
           <h2>How It Works</h2>
-          <p style={{ maxWidth: '500px', marginTop: '12px' }}>Get your projects done in three simple steps</p>
+          <p style={{ maxWidth: '500px', marginTop: '12px', color: 'rgba(255,255,255,0.7)' }}>Get your projects done in three simple steps</p>
         </div>
         <div className="steps-grid">
           <div className="step-card">
@@ -107,21 +107,21 @@ export default function Landing() {
         <div className="trust-inner">
           <div className="trust-item">
             <div className="trust-icon">
-              <Shield size={28} />
+              <Shield size={24} />
             </div>
             <h3>Secure Payments</h3>
             <p>Your payment is protected until you approve the deliverable. No upfront risk.</p>
           </div>
           <div className="trust-item">
             <div className="trust-icon">
-              <Clock size={28} />
+              <Clock size={24} />
             </div>
             <h3>On-Time Delivery</h3>
             <p>Freelancers are committed to deadlines. Get your work when you need it.</p>
           </div>
           <div className="trust-item">
             <div className="trust-icon">
-              <Users size={28} />
+              <Users size={24} />
             </div>
             <h3>Verified Talent</h3>
             <p>All freelancers go through a verification process to ensure quality and trust.</p>
@@ -131,12 +131,12 @@ export default function Landing() {
 
       {/* CTA Section */}
       <section className="section" style={{ textAlign: 'center' }}>
-        <h2 style={{ marginBottom: '16px' }}>Ready to get started?</h2>
-        <p style={{ maxWidth: '500px', margin: '0 auto 32px' }}>
+        <h2 style={{ marginBottom: '12px' }}>Ready to get started?</h2>
+        <p style={{ maxWidth: '500px', margin: '0 auto 28px', color: 'var(--text-secondary)' }}>
           Join thousands of businesses and freelancers on Remotiva today.
         </p>
-        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-          <Link to="/auth/register" className="btn btn-primary btn-lg">
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <Link to="/auth/register" className="btn btn-primary btn-lg" style={{ background: '#1dbf73' }}>
             Get Started
             <ArrowRight size={18} />
           </Link>

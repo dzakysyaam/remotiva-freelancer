@@ -105,15 +105,17 @@ export default function ServiceDetail() {
 
   if (orderComplete) {
     return (
-      <div className="checkout-layout">
-        <div className="checkout-section" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '64px' }}>
-          <div className="payment-success-icon">
-            <CheckCircle size={40} />
+      <div className="checkout-layout" style={{ gridTemplateColumns: '1fr' }}>
+        <div className="checkout-section" style={{ textAlign: 'center', padding: '64px' }}>
+          <div className="trust-icon" style={{ width: '80px', height: '80px', margin: '0 auto 24px' }}>
+            <CheckCircle size={40} style={{ color: '#1dbf73' }} />
           </div>
-          <h2>Order Placed Successfully!</h2>
-          <p>Thank you for your order. The seller will start working on your project soon.</p>
-          <div className="payment-ref">Order ID: {orderId}</div>
-          <p style={{ marginTop: '24px', color: 'var(--muted)' }}>Redirecting to orders...</p>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>Order Placed Successfully!</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>Thank you for your order. The seller will start working on your project soon.</p>
+          <div style={{ background: 'var(--bg-secondary)', padding: '12px 24px', borderRadius: '8px', display: 'inline-block', marginBottom: '16px' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 600 }}>Order ID: {orderId}</span>
+          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Redirecting to orders...</p>
         </div>
       </div>
     )
@@ -234,7 +236,7 @@ export default function ServiceDetail() {
             </div>
             <button
               className="btn btn-primary btn-lg"
-              style={{ width: '100%', marginTop: '20px' }}
+              style={{ width: '100%', marginTop: '20px', background: '#1dbf73' }}
               onClick={handleCheckout}
               disabled={processing}
             >
@@ -253,22 +255,29 @@ export default function ServiceDetail() {
   return (
     <div className="detail-layout">
       <div className="detail-main">
-        <button onClick={() => navigate(-1)} className="btn btn-ghost" style={{ margin: '16px 0 0 24px' }}>
-          <ArrowLeft size={18} />
-          Back
-        </button>
+        <div className="detail-breadcrumb">
+          <button onClick={() => navigate(-1)} className="btn btn-ghost" style={{ padding: '8px' }}>
+            <ArrowLeft size={18} />
+          </button>
+          <a href="/app/search">All Services</a>
+          <span>/</span>
+          <span>{item.title}</span>
+        </div>
+
         <img src={item.image_url} alt={item.title} className="detail-image" />
+
         <div className="detail-content">
           <div className="detail-badges">
             <span className="badge badge-rating">
-              <Star size={12} fill="currentColor" />
-              {Number(item.rating || 0).toFixed(1)} ({Math.floor(Math.random() * 50 + 10)} reviews)
+              <Star size={14} fill="#ffb800" color="#ffb800" />
+              {Number(item.rating || 0).toFixed(1)} ({Math.floor(Math.random() * 50 + 10)})
             </span>
             <span className="badge badge-delivery">
-              <Clock size={12} />
+              <Clock size={14} />
               {item.delivery_days} days delivery
             </span>
           </div>
+
           <h1>{item.title}</h1>
           <p className="detail-description">{item.description}</p>
 
@@ -281,11 +290,11 @@ export default function ServiceDetail() {
               <p className="seller-level">{item.seller_level}</p>
               <div className="seller-stats-row">
                 <div className="seller-stat">
-                  <Star size={14} fill="#f59e0b" color="#f59e0b" />
-                  <span>{Number(item.rating || 0).toFixed(1)}</span>
+                  <Star size={16} fill="#ffb800" color="#ffb800" />
+                  <span style={{ fontWeight: 700 }}>{Number(item.rating || 0).toFixed(1)}</span>
                 </div>
                 <div className="seller-stat">
-                  <Clock size={14} />
+                  <Clock size={16} />
                   <span>{item.delivery_days} days</span>
                 </div>
               </div>
@@ -319,18 +328,18 @@ export default function ServiceDetail() {
           </div>
 
           <ul className="order-features">
-            <li><Check size={16} /> Source files included</li>
-            <li><Check size={16} /> Commercial use</li>
-            <li><Check size={16} /> {item.delivery_days} day delivery</li>
-            <li><Check size={16} /> {packages[selectedPackage].revisions === 99 ? 'Unlimited' : packages[selectedPackage].revisions} revision{s.packages?.[selectedPackage]?.revisions !== 1 ? 's' : ''}</li>
+            <li><Check size={18} /> Source files included</li>
+            <li><Check size={18} /> Commercial use</li>
+            <li><Check size={18} /> {item.delivery_days} day delivery</li>
+            <li><Check size={18} /> {packages[selectedPackage].revisions === 99 ? 'Unlimited' : packages[selectedPackage].revisions} revision{packages[selectedPackage].revisions !== 1 ? 's' : ''}</li>
           </ul>
 
           <button
             className="btn btn-primary btn-lg"
-            style={{ width: '100%' }}
+            style={{ width: '100%', background: '#1dbf73' }}
             onClick={() => setShowCheckout(true)}
           >
-            Continue to Checkout
+            Continue
           </button>
         </div>
 
