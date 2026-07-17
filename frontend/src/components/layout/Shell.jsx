@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Search, Heart, ShoppingCart, Globe, Menu, X, ChevronDown, Home, Compass, User } from 'lucide-react'
 import { session } from '../../lib/api'
+import { Logo } from '../brand'
 import { useState, useEffect } from 'react'
 
 const categoryIcons = {
@@ -52,12 +53,7 @@ export function Shell() {
         <div className="navbar-container">
           <div className="navbar-left">
             <NavLink to="/app" className="navbar-logo">
-              <div className="logo-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 12L10 18L20 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <span className="logo-text">remotiva</span>
+              <Logo size="sm" />
             </NavLink>
 
             <div className="navbar-search">
@@ -160,12 +156,7 @@ export function Shell() {
           <div className="footer-grid">
             <div className="footer-brand">
               <NavLink to="/app" className="navbar-logo">
-                <div className="logo-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 12L10 18L20 6" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <span className="logo-text">remotiva</span>
+                <Logo size="sm" />
               </NavLink>
               <p className="footer-tagline">
                 Connect with world-class talent. Find the perfect freelancer for any project.

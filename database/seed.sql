@@ -1,10 +1,10 @@
 USE remotiva_db;
 
 INSERT INTO users (name,email,password_hash,role,seller_level) VALUES
-('Fery Firdaus','fery@remotiva.id','5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8','buyer','Klien Aktif'),
-('Nadia Studio','nadia@remotiva.id','5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8','seller','Top Rated'),
-('Kreasi Media','kreasi@remotiva.id','5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8','seller','Level 2'),
-('Andara Tech','andara@remotiva.id','5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8','seller','Level 1');
+('Fery Firdaus','fery@remotiva.id','$2b$12$voL4Gf/qZ4KFkFf84wTW7O9kY7xnYfdzVcqpd/zy9oq83cI76rBHe','buyer','Klien Aktif'),
+('Nadia Studio','nadia@remotiva.id','$2b$12$voL4Gf/qZ4KFkFf84wTW7O9kY7xnYfdzVcqpd/zy9oq83cI76rBHe','seller','Top Rated'),
+('Kreasi Media','kreasi@remotiva.id','$2b$12$voL4Gf/qZ4KFkFf84wTW7O9kY7xnYfdzVcqpd/zy9oq83cI76rBHe','seller','Level 2'),
+('Andara Tech','andara@remotiva.id','$2b$12$voL4Gf/qZ4KFkFf84wTW7O9kY7xnYfdzVcqpd/zy9oq83cI76rBHe','seller','Level 1');
 
 INSERT INTO categories (name,slug,icon,description,sort_order) VALUES
 ('Desain & Grafis','desain-grafis','◇','Logo, brand identity, ilustrasi, dan desain visual.',1),

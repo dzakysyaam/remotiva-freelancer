@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { api, session } from '../lib/api'
+import { Logo } from '../components/brand'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -34,73 +35,77 @@ export default function Register() {
 
   return (
     <div className="auth-container">
+      {/* Left side - Visual Panel */}
       <div className="auth-left">
         <div className="auth-brand">
-          <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
-            <rect width="32" height="32" rx="6" fill="white"/>
-            <path d="M8 16L14 22L24 10" stroke="#1dbf73" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          remotiva
+          <Logo variant="inverse" size="md" />
         </div>
         <div className="auth-left-content">
           <h1>Join thousands of professionals on Remotiva</h1>
           <p>Create your account today and start working with talented freelancers or showcase your skills to clients worldwide.</p>
         </div>
+        {/* Visual illustration using account asset */}
+        <div className="auth-visual">
+          <img
+            src="/assets/account.jpg"
+            alt="Account management"
+            className="auth-image"
+          />
+        </div>
       </div>
 
+      {/* Right side - Register Form */}
       <div className="auth-right">
         <div className="auth-form-container">
-          <h2>Create an account</h2>
-          <p>Fill in your details to get started</p>
+          <div className="auth-form-header">
+            <h2>Create an account</h2>
+            <p>Fill in your details to get started</p>
+          </div>
 
           <form onSubmit={submit}>
             <div className="form-group">
-              <label>Full name</label>
+              <label htmlFor="name">Full name</label>
               <input
+                id="name"
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="John Doe"
                 required
+                autoComplete="name"
               />
             </div>
 
             <div className="form-group">
-              <label>Email address</label>
+              <label htmlFor="email">Email address</label>
               <input
+                id="email"
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com"
                 required
+                autoComplete="email"
               />
             </div>
 
             <div className="form-group">
-              <label>Password</label>
-              <div style={{ position: 'relative' }}>
+              <label htmlFor="password">Password</label>
+              <div className="password-input-wrapper">
                 <input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Create a strong password"
                   required
                   minLength={6}
-                  style={{ paddingRight: '48px' }}
                 />
                 <button
                   type="button"
+                  className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '14px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--text-secondary)'
-                  }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -108,8 +113,12 @@ export default function Register() {
             </div>
 
             <div className="form-group">
-              <label>I want to</label>
-              <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+              <label htmlFor="role">I want to</label>
+              <select
+                id="role"
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              >
                 <option value="buyer">Find services and hire freelancers</option>
                 <option value="seller">Offer my services as a freelancer</option>
               </select>
@@ -119,15 +128,14 @@ export default function Register() {
 
             <button
               type="submit"
-              className="btn btn-primary btn-lg"
-              style={{ width: '100%', marginTop: '8px', background: '#1dbf73' }}
+              className="btn btn-primary btn-lg auth-submit"
               disabled={loading}
             >
               {loading ? 'Creating account...' : 'Continue'}
             </button>
 
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '16px', textAlign: 'center' }}>
-              By creating an account, you agree to our <a href="#" style={{ color: 'var(--primary)' }}>Terms of Service</a> and <a href="#" style={{ color: 'var(--primary)' }}>Privacy Policy</a>.
+            <p className="auth-terms">
+              By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
             </p>
           </form>
 
