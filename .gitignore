@@ -22,3 +22,8 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+backend/.venv/
+.venv/
+frontend/node_modules/
+frontend/dist/
