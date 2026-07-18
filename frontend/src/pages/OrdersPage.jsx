@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Package, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { api } from '../lib/api'
+import { orders, formatOrderStatus } from '../data/uiCopy'
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([])
+  const [ordersList, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -45,35 +46,35 @@ export default function OrdersPage() {
   }
 
   const stats = {
-    total: orders.length,
-    pending: orders.filter(o => o.status === 'Pending').length,
-    inProgress: orders.filter(o => o.status === 'In Progress').length,
-    completed: orders.filter(o => o.status === 'Completed').length
+    total: ordersList.length,
+    pending: ordersList.filter(o => o.status === 'Pending').length,
+    inProgress: ordersList.filter(o => o.status === 'In Progress').length,
+    completed: ordersList.filter(o => o.status === 'Completed').length
   }
 
   return (
     <div className="dashboard-layout">
       <div className="dashboard-header">
-        <h1>My Orders</h1>
-        <p>Manage your orders and track progress</p>
+        <h1>{orders.title}</h1>
+        <p>{orders.subtitle}</p>
       </div>
 
       {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <h4>Total Orders</h4>
+          <h4>{orders.totalOrders}</h4>
           <div className="stat-value">{stats.total}</div>
         </div>
         <div className="stat-card">
-          <h4>Pending</h4>
+          <h4>{orders.pending}</h4>
           <div className="stat-value" style={{ color: '#f59e0b' }}>{stats.pending}</div>
         </div>
         <div className="stat-card">
-          <h4>In Progress</h4>
+          <h4>{orders.inProgress}</h4>
           <div className="stat-value" style={{ color: 'var(--primary)' }}>{stats.inProgress}</div>
         </div>
         <div className="stat-card">
-          <h4>Completed</h4>
+          <h4>{orders.completed}</h4>
           <div className="stat-value" style={{ color: '#1dbf73' }}>{stats.completed}</div>
         </div>
       </div>
@@ -81,28 +82,28 @@ export default function OrdersPage() {
       {/* Orders Table */}
       <div className="orders-table">
         <div className="table-header">
-          <div>Service</div>
-          <div>Status</div>
-          <div>Price</div>
-          <div>Date</div>
-          <div>Actions</div>
+          <div>{orders.service}</div>
+          <div>{orders.status}</div>
+          <div>{orders.price}</div>
+          <div>{orders.date}</div>
+          <div>{orders.actions}</div>
         </div>
 
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
-            <p style={{ color: 'var(--text-secondary)' }}>Loading orders...</p>
+            <p style={{ color: 'var(--text-secondary)' }}>{orders.loadingOrders}</p>
           </div>
-        ) : orders.length === 0 ? (
+        ) : ordersList.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">
               <Package size={32} />
             </div>
-            <h2>No orders yet</h2>
-            <p>Start by exploring our services and placing your first order.</p>
-            <Link to="/app/search" className="btn btn-primary">Browse Services</Link>
+            <h2>{orders.noOrdersYet}</h2>
+            <p>{orders.startExploring}</p>
+            <Link to="/app/search" className="btn btn-primary">{orders.browseServices}</Link>
           </div>
         ) : (
-          orders.map(order => (
+          ordersList.map(order => (
             <div className="table-row" key={order.id}>
               <div className="order-service">
                 <div className="order-service-info">
@@ -113,14 +114,14 @@ export default function OrdersPage() {
               <div>
                 <span className={`status-badge ${getStatusClass(order.status)}`}>
                   {getStatusIcon(order.status)}
-                  <span style={{ marginLeft: '6px' }}>{order.status}</span>
+                  <span style={{ marginLeft: '6px' }}>{formatOrderStatus(order.status)}</span>
                 </span>
               </div>
               <div style={{ fontWeight: 600 }}>
                 Rp{Number(order.total_price || 0).toLocaleString('id-ID')}
               </div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', {
+                {order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID', {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric'
@@ -128,7 +129,7 @@ export default function OrdersPage() {
               </div>
               <div>
                 <Link to={`/app/services/${order.service_id}`} className="btn btn-sm btn-secondary">
-                  View
+                  {orders.view}
                 </Link>
               </div>
             </div>

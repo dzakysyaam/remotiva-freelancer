@@ -2,20 +2,22 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Sparkles, Check, ChevronLeft } from 'lucide-react'
 import { api } from '../lib/api'
+import { interests as interestsCopy } from '../data/uiCopy'
 
+// Interest categories with Indonesian labels
 const defaultInterests = [
-  'Social Media Content',
-  'Brand Identity Design',
-  'Print-Ready Designs',
-  'Photo & Image Editing',
-  'Professional Photography',
-  'E-commerce Solutions',
-  'Website Development',
-  'Mobile App Development',
-  'SEO & Marketing',
-  'Video Editing',
-  'Copywriting',
-  'Translation Services'
+  'Konten Media Sosial',
+  'Desain Identitas Merek',
+  'Desain Siap Cetak',
+  'Edit Foto & Gambar',
+  'Fotografi Profesional',
+  'Solusi E-commerce',
+  'Pengembangan Website',
+  'Pengembangan Aplikasi Mobile',
+  'SEO & Pemasaran',
+  'Editing Video',
+  'Penulisan',
+  'Jasa Terjemahan'
 ]
 
 export default function InterestsPage() {
@@ -59,7 +61,7 @@ export default function InterestsPage() {
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px' }}>
       <Link to="/app/profile" className="btn btn-ghost" style={{ marginBottom: '24px' }}>
         <ChevronLeft size={18} />
-        Back to Profile
+        {interestsCopy.backToProfile}
       </Link>
 
       <div style={{ marginBottom: '40px' }}>
@@ -68,8 +70,8 @@ export default function InterestsPage() {
             <Sparkles size={28} color="var(--primary)" />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.75rem', marginBottom: '4px' }}>Your Interests</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>Select categories to personalize your experience</p>
+            <h1 style={{ fontSize: '1.75rem', marginBottom: '4px' }}>{interestsCopy.title}</h1>
+            <p style={{ color: 'var(--text-secondary)' }}>{interestsCopy.subtitle}</p>
           </div>
         </div>
       </div>
@@ -107,10 +109,10 @@ export default function InterestsPage() {
           onClick={handleSave}
           disabled={saving}
         >
-          {saving ? 'Saving...' : 'Save Interests'}
+          {saving ? interestsCopy.saving : interestsCopy.saveInterests}
         </button>
         <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-          {selected.length} selected
+          {selected.length} {interestsCopy.selected}
         </span>
       </div>
     </div>

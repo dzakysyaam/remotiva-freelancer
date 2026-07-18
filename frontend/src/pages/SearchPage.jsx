@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, X, Grid, List } from 'lucide-react'
 import { api } from '../lib/api'
 import { ServiceCard, GigCardList } from '../components/marketplace/ServiceCard'
 import { FilterSidebar } from '../components/marketplace/FilterSidebar'
+import { search } from '../data/uiCopy'
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -68,10 +69,10 @@ export default function SearchPage() {
   // Get current category name
   const currentCategory = categories.find(c => c.slug === categorySlug)
   const pageTitle = categorySlug
-    ? currentCategory?.name || 'Services'
+    ? currentCategory?.name || search.servicesCount
     : query
-      ? `Results for "${query}"`
-      : 'All Services'
+      ? search.resultsFor.replace('{query}', query)
+      : search.allServices
 
   return (
     <div className="marketplace-layout">
@@ -94,7 +95,7 @@ export default function SearchPage() {
                 type="text"
                 name="q"
                 defaultValue={query}
-                placeholder="Search for any service..."
+                placeholder={search.searchPlaceholder}
                 style={{
                   width: '100%',
                   height: '44px',
@@ -106,7 +107,7 @@ export default function SearchPage() {
               />
             </div>
             <button type="submit" className="btn btn-primary" style={{ padding: '0 20px' }}>
-              Search
+              {search.searchButton}
             </button>
           </div>
         </form>
@@ -115,7 +116,7 @@ export default function SearchPage() {
         <div className="marketplace-header">
           <div className="marketplace-header-left">
             <h1>{pageTitle}</h1>
-            <span className="marketplace-count" style={{ margin: 0 }}>({services.length} services)</span>
+            <span className="marketplace-count" style={{ margin: 0 }}>({services.length} {search.servicesCount})</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* View Toggle */}
@@ -123,28 +124,28 @@ export default function SearchPage() {
               <button
                 className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
                 onClick={() => setViewMode('grid')}
-                title="Grid view"
+                title={search.gridView}
               >
                 <Grid size={18} />
               </button>
               <button
                 className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
                 onClick={() => setViewMode('list')}
-                title="List view"
+                title={search.listView}
               >
                 <List size={18} />
               </button>
             </div>
 
             <div className="marketplace-sort">
-              <label>Sort by:</label>
+              <label>{search.sortBy}</label>
               <select value={sortBy} onChange={handleSortChange}>
-                <option value="recommended">Recommended</option>
-                <option value="rating">Highest Rated</option>
-                <option value="reviews">Most Reviewed</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="newest">Newest</option>
+                <option value="recommended">{search.recommended}</option>
+                <option value="rating">{search.highestRated}</option>
+                <option value="reviews">{search.mostReviewed}</option>
+                <option value="price-low">{search.priceLowHigh}</option>
+                <option value="price-high">{search.priceHighLow}</option>
+                <option value="newest">{search.newest}</option>
               </select>
             </div>
           </div>
@@ -153,10 +154,10 @@ export default function SearchPage() {
         {/* Active Filters */}
         {hasFilters && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Active filters:</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{search.activeFilters}</span>
             {query && (
               <span className="badge" style={{ background: 'var(--primary-soft)', color: 'var(--primary)', padding: '6px 12px', borderRadius: '4px' }}>
-                Search: {query}
+                {query}
               </span>
             )}
             {categorySlug && (
@@ -166,7 +167,7 @@ export default function SearchPage() {
             )}
             <button onClick={clearFilters} className="btn btn-ghost btn-sm">
               <X size={14} />
-              Clear all
+              {search.clearAll}
             </button>
           </div>
         )}
@@ -174,16 +175,16 @@ export default function SearchPage() {
         {/* Services Grid/List */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
-            <p style={{ color: 'var(--text-secondary)' }}>Loading services...</p>
+            <p style={{ color: 'var(--text-secondary)' }}>Memuat layanan...</p>
           </div>
         ) : services.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">
               <Search size={32} />
             </div>
-            <h2>No services found</h2>
-            <p>Try adjusting your search or filters to find what you're looking for.</p>
-            <button onClick={clearFilters} className="btn btn-primary">Clear filters</button>
+            <h2>{search.noServicesFound}</h2>
+            <p>{search.tryAdjusting}</p>
+            <button onClick={clearFilters} className="btn btn-primary">{search.clearFilters}</button>
           </div>
         ) : (
           <div className={`services-grid ${viewMode === 'list' ? 'list-view' : ''}`}>

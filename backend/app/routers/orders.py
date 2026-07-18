@@ -41,6 +41,13 @@ async def create_order(
     db: Session = Depends(get_db),
 ):
     """Create a new order."""
+    # Only buyers can create orders
+    if current_user.role != "buyer":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only buyers can create orders.",
+        )
+
     repo = OrderRepository(db)
 
     # Check if service exists

@@ -5,13 +5,16 @@ import {
   LogOut, ChevronRight, Palette, Globe, Building, Sparkles
 } from 'lucide-react'
 import { api, session } from '../lib/api'
+import { profile as profileCopy, formatRole, formatSavedCount } from '../data/uiCopy'
+import { useLanguage } from '../i18n/LanguageContext'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null)
   const [saved, setSaved] = useState([])
   const [loading, setLoading] = useState(true)
+  const { t } = useLanguage()
 
-  const user = session.user || { name: 'Guest', email: '' }
+  const user = session.user || { name: 'Tamu', email: '' }
 
   useEffect(() => {
     Promise.all([
@@ -28,25 +31,25 @@ export default function ProfilePage() {
 
   const menuGroups = [
     {
-      title: 'Account',
+      title: t("profile.account"),
       items: [
-        { icon: User, label: 'Profile', href: '/app/profile', desc: 'Manage your profile information' },
-        { icon: Sparkles, label: 'Interests', href: '/app/profile/interests', desc: 'Set your service preferences' },
-        { icon: Settings, label: 'Preferences', href: '/app/profile/preferences', desc: 'Language, currency, notifications' }
+        { icon: User, label: t("profile.profile"), href: '/app/profile', desc: t("profile.profileDesc") },
+        { icon: Sparkles, label: t("profile.interests"), href: '/app/profile/interests', desc: t("profile.servicePreferences") },
+        { icon: Settings, label: t("profile.preferences"), href: '/app/profile/preferences', desc: t("profile.languageCurrencyNotifications") }
       ]
     },
     {
-      title: 'My Activity',
+      title: t("profile.myActivity"),
       items: [
-        { icon: Heart, label: 'Saved Services', href: '/app/saved', desc: `${saved.length} saved items` },
-        { icon: Briefcase, label: 'Orders', href: '/app/orders', desc: 'View and manage orders' },
-        { icon: Star, label: 'Reviews', href: '#', desc: 'Your reviews and ratings' }
+        { icon: Heart, label: t("profile.savedServices"), href: '/app/saved', desc: t("profile.savedItems").replace("{count}", saved.length) },
+        { icon: Briefcase, label: t("profile.orders"), href: '/app/orders', desc: t("profile.orders") },
+        { icon: Star, label: t("profile.reviews"), href: '#', desc: t("profile.reviews") }
       ]
     },
     {
-      title: 'Freelancing',
+      title: t("profile.freelancing"),
       items: [
-        { icon: Building, label: 'Become a Seller', href: '/app/become-seller', desc: 'Start selling your services' }
+        { icon: Building, label: t("profile.becomeSeller"), href: '/app/become-seller', desc: t("profile.becomeSellerDesc") }
       ]
     }
   ]
@@ -57,37 +60,40 @@ export default function ProfilePage() {
     window.location.href = '/auth/login'
   }
 
+  // Get role label for display
+  const roleLabel = user.role === 'seller' ? t("profile.freelancer") : t("profile.client")
+
   return (
     <div className="profile-layout">
       {/* Sidebar */}
       <div className="profile-sidebar">
         <div className="profile-avatar">
-          {user.name?.[0]?.toUpperCase() || 'G'}
+          {user.name?.[0]?.toUpperCase() || 'T'}
         </div>
         <h2 className="profile-name">{user.name}</h2>
-        <p className="profile-role">{user.role === 'seller' ? 'Freelancer' : 'Client'}</p>
+        <p className="profile-role">{roleLabel}</p>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{user.email}</p>
 
         <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{saved.length}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Saved</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{t("profile.saved")}</div>
             </div>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>0</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Orders</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{t("profile.orders")}</div>
             </div>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>0</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Reviews</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{t("profile.reviews")}</div>
             </div>
           </div>
         </div>
 
         <button className="btn btn-secondary" style={{ width: '100%', marginTop: '24px' }} onClick={logout}>
           <LogOut size={16} />
-          Sign Out
+          {t("profile.signOut")}
         </button>
       </div>
 
@@ -115,8 +121,8 @@ export default function ProfilePage() {
         {saved.length > 0 && (
           <div className="profile-section">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2>Saved Services</h2>
-              <Link to="/app/saved" className="btn btn-ghost btn-sm">View All</Link>
+              <h2>{t("profile.savedServicesPreview")}</h2>
+              <Link to="/app/saved" className="btn btn-ghost btn-sm">{t("common.viewAll")}</Link>
             </div>
             <div className="saved-grid">
               {saved.slice(0, 4).map(item => (

@@ -1,19 +1,33 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app.database import get_db
 from app.schemas import UserRegister, UserLogin, AuthResponse, UserResponse
 from app.repositories import UserRepository
 from app.security import hash_password, verify_password, create_access_token
+from app.rate_limiter import rate_limiter
 
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=AuthResponse)
-async def register(data: UserRegister, db: Session = Depends(get_db)):
-    """Register a new user."""
+async def register(data: UserRegister, request: Request, db: Session = Depends(get_db)):
+    """Register a new user. Only buyer and seller roles allowed."""
+    # Rate limit: 10 requests per minute per IP for registration
+    allowed, response = rate_limiter.is_allowed(request, limit=10, path_prefix="/api/auth/register")
+    if not allowed:
+        return response
+
     repo = UserRepository(db)
+
+    # Reject admin role from public registration
+    if data.role == "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot register as admin. Admin accounts are created by administrators.",
+        )
 
     # Check if email exists
     existing = repo.get_user_by_email(data.email.lower())
@@ -31,12 +45,13 @@ async def register(data: UserRegister, db: Session = Depends(get_db)):
         )
 
     # Create user with bcrypt hash
-    role = data.role if data.role else "buyer"
+    role = data.role if data.role in ["buyer", "seller"] else "buyer"
     user = repo.create_user(
         name=data.name,
         email=data.email.lower(),
         password_hash=hash_password(data.password),
         role=role,
+        is_active=True,
     )
 
     # Create token
@@ -53,14 +68,19 @@ async def register(data: UserRegister, db: Session = Depends(get_db)):
             name=user.name,
             email=user.email,
             role=user.role,
-            created_at=user.created_at,
+            is_active=user.is_active,
         ),
     )
 
 
 @router.post("/login", response_model=AuthResponse)
-async def login(data: UserLogin, db: Session = Depends(get_db)):
+async def login(data: UserLogin, request: Request, db: Session = Depends(get_db)):
     """Login user and return JWT token."""
+    # Rate limit: 10 requests per minute per IP for login
+    allowed, response = rate_limiter.is_allowed(request, limit=10, path_prefix="/api/auth/login")
+    if not allowed:
+        return response
+
     repo = UserRepository(db)
 
     user_data = repo.get_user_by_email(data.email.lower())
@@ -71,6 +91,13 @@ async def login(data: UserLogin, db: Session = Depends(get_db)):
         )
 
     user, stored_hash = user_data
+
+    # Check if user is active
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is inactive. Please contact customer service.",
+        )
 
     # Verify password
     if not verify_password(data.password, stored_hash):
@@ -93,6 +120,6 @@ async def login(data: UserLogin, db: Session = Depends(get_db)):
             name=user.name,
             email=user.email,
             role=user.role,
-            created_at=user.created_at,
+            is_active=user.is_active,
         ),
     )

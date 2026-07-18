@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Globe, Bell, Shield, Check, ChevronLeft } from 'lucide-react'
 import { api } from '../lib/api'
+import { preferences as prefsCopy } from '../data/uiCopy'
 
 const languages = [
   { value: 'id', label: 'Bahasa Indonesia' },
@@ -9,8 +10,8 @@ const languages = [
 ]
 
 const currencies = [
-  { value: 'IDR', label: 'IDR - Indonesian Rupiah' },
-  { value: 'USD', label: 'USD - US Dollar' }
+  { value: 'IDR', label: 'IDR - Rupiah Indonesia' },
+  { value: 'USD', label: 'USD - Dolar AS' }
 ]
 
 export default function PreferencesPage() {
@@ -52,23 +53,23 @@ export default function PreferencesPage() {
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px 24px' }}>
       <Link to="/app/profile" className="btn btn-ghost" style={{ marginBottom: '24px' }}>
         <ChevronLeft size={18} />
-        Back to Profile
+        {prefsCopy.backToProfile}
       </Link>
 
       <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '1.75rem', marginBottom: '8px' }}>Preferences</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Customize your Remotiva experience</p>
+        <h1 style={{ fontSize: '1.75rem', marginBottom: '8px' }}>{prefsCopy.title}</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>{prefsCopy.subtitle}</p>
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className="profile-section" style={{ marginBottom: '24px' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Globe size={20} style={{ color: 'var(--primary)' }} />
-            Language & Region
+            {prefsCopy.languageRegion}
           </h2>
           <div style={{ display: 'grid', gap: '20px' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Language</label>
+              <label>{prefsCopy.language}</label>
               <select
                 value={form.language}
                 onChange={(e) => setForm({ ...form, language: e.target.value })}
@@ -79,7 +80,7 @@ export default function PreferencesPage() {
               </select>
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Currency</label>
+              <label>{prefsCopy.currency}</label>
               <select
                 value={form.currency}
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
@@ -95,12 +96,12 @@ export default function PreferencesPage() {
         <div className="profile-section" style={{ marginBottom: '24px' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Bell size={20} style={{ color: 'var(--primary)' }} />
-            Notifications
+            {prefsCopy.notifications}
           </h2>
           <div className="toggle-row" style={{ padding: '16px 0' }}>
             <div>
-              <div style={{ fontWeight: 600 }}>Email Notifications</div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Receive updates about your orders and messages</div>
+              <div style={{ fontWeight: 600 }}>{prefsCopy.emailNotifications}</div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{prefsCopy.emailNotificationsDesc}</div>
             </div>
             <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '28px' }}>
               <input
@@ -136,29 +137,29 @@ export default function PreferencesPage() {
         <div className="profile-section" style={{ marginBottom: '24px' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Shield size={20} style={{ color: 'var(--primary)' }} />
-            Privacy
+            {prefsCopy.privacy}
           </h2>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label>Privacy Level</label>
+            <label>{prefsCopy.privacyLevel}</label>
             <select
               value={form.privacy}
               onChange={(e) => setForm({ ...form, privacy: e.target.value })}
             >
-              <option value="standard">Standard</option>
-              <option value="high">High Privacy</option>
-              <option value="public">Public Profile</option>
+              <option value="standard">{prefsCopy.standardPrivacy}</option>
+              <option value="high">{prefsCopy.highPrivacy}</option>
+              <option value="public">{prefsCopy.publicProfile}</option>
             </select>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? prefsCopy.saving : prefsCopy.saveChanges}
           </button>
           {saved && (
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)', fontWeight: 600 }}>
               <Check size={18} />
-              Preferences saved!
+              {prefsCopy.preferencesSaved}
             </span>
           )}
         </div>

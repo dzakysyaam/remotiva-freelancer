@@ -14,8 +14,10 @@ class User(Base):
     email = Column(String(160), nullable=False, unique=True)
     password_hash = Column(String(255), nullable=False)
     role = Column(String(20), nullable=False, default="buyer")
+    is_active = Column(Boolean, nullable=False, default=True)
     seller_level = Column(String(80), nullable=False, default="Freelancer Baru")
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=True, onupdate=func.current_timestamp())
 
 
 class Category(Base):
@@ -82,3 +84,43 @@ class UserProfile(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     preferences = Column(JSON, nullable=False)
     interests = Column(JSON, nullable=False)
+
+
+class CustomerServiceThread(Base):
+    __tablename__ = "customer_service_threads"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    subject = Column(String(255), nullable=False)
+    status = Column(String(20), nullable=False, default="open")
+    created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=True, onupdate=func.current_timestamp())
+
+
+class CustomerServiceMessage(Base):
+    __tablename__ = "customer_service_messages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    thread_id = Column(Integer, ForeignKey("customer_service_threads.id", ondelete="CASCADE"), nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    sender_role = Column(String(20), nullable=False)
+    message = Column(Text, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
+
+
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    method = Column(String(50), nullable=False)
+    amount = Column(DECIMAL(12, 2), nullable=False)
+    fee = Column(DECIMAL(12, 2), nullable=False, default=0)
+    total_amount = Column(DECIMAL(12, 2), nullable=False)
+    status = Column(String(20), nullable=False, default="pending")
+    payment_code = Column(String(100), nullable=True)
+    va_number = Column(String(50), nullable=True)
+    expiry_time = Column(TIMESTAMP, nullable=True)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
+    paid_at = Column(TIMESTAMP, nullable=True)

@@ -3,12 +3,13 @@ import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Star, Clock } from 'lucide-react'
 import { api } from '../lib/api'
 import { ServiceCard } from '../components/marketplace/ServiceCard'
+import { category as catCopy } from '../data/uiCopy'
 
 const filters = [
-  { value: '', label: 'All' },
-  { value: 'featured', label: 'Featured' },
-  { value: 'rating', label: 'Top Rated' },
-  { value: 'newest', label: 'Newest' }
+  { value: '', label: catCopy.all },
+  { value: 'featured', label: catCopy.featured },
+  { value: 'rating', label: catCopy.topRated },
+  { value: 'newest', label: catCopy.newest }
 ]
 
 export default function CategoryPage() {
@@ -38,12 +39,12 @@ export default function CategoryPage() {
       <div style={{ marginBottom: '32px' }}>
         <Link to="/app/search" className="btn btn-ghost" style={{ marginBottom: '16px' }}>
           <ArrowLeft size={18} />
-          Back to Categories
+          {catCopy.backToCategories}
         </Link>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>{category?.name || 'Services'}</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>{category?.description || 'Browse all services in this category'}</p>
+            <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>{category?.name || catCopy.allServices}</h1>
+            <p style={{ color: 'var(--text-secondary)' }}>{category?.description || catCopy.browseAll}</p>
           </div>
           <div style={{ fontSize: '2rem' }}>{category?.icon || '◇'}</div>
         </div>
@@ -64,22 +65,22 @@ export default function CategoryPage() {
 
       {/* Results Count */}
       <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
-        {services.length} services available
+        {services.length} {catCopy.servicesAvailable}
       </p>
 
       {/* Services Grid */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>
-          <p style={{ color: 'var(--text-secondary)' }}>Loading services...</p>
+          <p style={{ color: 'var(--text-secondary)' }}>{catCopy.loadingServices}</p>
         </div>
       ) : services.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">
             <Star size={48} />
           </div>
-          <h2>No services in this category</h2>
-          <p>Check back later or explore other categories.</p>
-          <Link to="/app/search" className="btn btn-primary">Browse All Services</Link>
+          <h2>{catCopy.noServicesInCategory}</h2>
+          <p>{catCopy.checkBackLater}</p>
+          <Link to="/app/search" className="btn btn-primary">{catCopy.browseAllServices}</Link>
         </div>
       ) : (
         <div className="services-grid">

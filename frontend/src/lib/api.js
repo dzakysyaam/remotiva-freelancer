@@ -14,7 +14,7 @@ async function request(path, options = {}) {
   const response = await fetch(`${baseUrl}${path}`, { ...options, headers })
   const payload = await response.json().catch(() => ({}))
 
-  if (!response.ok) throw new Error(payload.message || 'Request failed')
+  if (!response.ok) throw new Error(payload.detail || payload.message || 'Request failed')
   return payload
 }
 
@@ -36,5 +36,33 @@ export const api = {
   inbox: () => request('/messages'),
   profile: () => request('/profile'),
   updatePreferences: data => request('/profile/preferences', { method: 'PATCH', body: JSON.stringify(data) }),
-  updateInterests: data => request('/profile/interests', { method: 'PATCH', body: JSON.stringify(data) })
+  updateInterests: data => request('/profile/interests', { method: 'PATCH', body: JSON.stringify(data) }),
+
+  // Payments
+  payments: () => request('/payments'),
+  createPayment: data => request('/payments/create', { method: 'POST', body: JSON.stringify(data) }),
+  getPayment: id => request(`/payments/${id}`),
+  markPaymentPaid: id => request(`/payments/${id}/mark-paid`, { method: 'PATCH' }),
+  markPaymentFailed: id => request(`/payments/${id}/mark-failed`, { method: 'PATCH' }),
+  paymentStats: () => request('/payments/stats'),
+
+  // Customer Service
+  csThreads: () => request('/customer-service/threads'),
+  createCsThread: data => request('/customer-service/threads', { method: 'POST', body: JSON.stringify(data) }),
+  getCsThread: id => request(`/customer-service/threads/${id}`),
+  getCsThreadMessages: id => request(`/customer-service/threads/${id}/messages`),
+  sendCsMessage: (id, data) => request(`/customer-service/threads/${id}/messages`, { method: 'POST', body: JSON.stringify(data) }),
+
+  // Admin
+  adminUsers: () => request('/admin/users'),
+  adminToggleUser: id => request(`/admin/users/${id}/toggle-active`, { method: 'PATCH' }),
+  adminUpdateRole: (id, data) => request(`/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify(data) }),
+  adminCsThreads: (status) => {
+    const query = status ? `?status_filter=${status}` : ''
+    return request(`/admin/customer-service/threads${query}`)
+  },
+  adminCsThread: id => request(`/admin/customer-service/threads/${id}`),
+  adminCsThreadMessages: id => request(`/admin/customer-service/threads/${id}/messages`),
+  adminSendCsMessage: (id, data) => request(`/admin/customer-service/threads/${id}/messages`, { method: 'POST', body: JSON.stringify(data) }),
+  adminUpdateCsStatus: (id, data) => request(`/admin/customer-service/threads/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
 }

@@ -1,0 +1,259 @@
+/* ============================================
+   CUSTOMER SERVICE FLOATING BUTTON
+   ============================================ */
+.cs-float-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: #2D76FF;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(45, 118, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  border: none;
+}
+
+.cs-float-btn:hover {
+  background: #1F66EC;
+  transform: scale(1.08);
+  box-shadow: 0 12px 32px rgba(45, 118, 255, 0.5);
+}
+
+.cs-float-btn img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* ============================================
+   CUSTOMER SERVICE POPUP OVERLAY
+   ============================================ */
+.cs-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  z-index: 1001;
+  padding: 24px;
+}
+
+/* ============================================
+   CHAT POPUP
+   ============================================ */
+.customer-chat {
+  width: 380px;
+  height: 560px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+  display: flex;
+  flex-direction: column;
+  animation: csSlideIn 0.25s ease-out;
+}
+
+@keyframes csSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================
+   CHAT HEADER
+   ============================================ */
+.customer-chat-header {
+  background: #2D76FF;
+  color: #fff;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.customer-chat-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.customer-chat-title strong {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.customer-chat-header span {
+  display: block;
+  font-size: 12px;
+  opacity: 0.82;
+  margin-top: 2px;
+}
+
+.customer-chat-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: none;
+}
+
+.customer-chat-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.customer-chat-title img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* ============================================
+   CHAT BODY
+   ============================================ */
+.customer-chat-body {
+  flex: 1;
+  padding: 18px;
+  overflow-y: auto;
+  background: #F8FAFC;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ============================================
+   CHAT MESSAGE BUBBLES
+   ============================================ */
+.chat-message {
+  max-width: 78%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+}
+
+.chat-message p {
+  margin: 0;
+}
+
+.chat-message-support {
+  align-self: flex-start;
+  background: #fff;
+  color: #0F172A;
+  border: 1px solid #E2E8F0;
+  border-bottom-left-radius: 6px;
+}
+
+.chat-message-user {
+  align-self: flex-end;
+  background: #2D76FF;
+  color: #fff;
+  border-bottom-right-radius: 6px;
+}
+
+.chat-message-time {
+  display: block;
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.chat-message-support .chat-message-time {
+  text-align: left;
+}
+
+/* ============================================
+   CHAT FOOTER
+   ============================================ */
+.customer-chat-footer {
+  padding: 12px;
+  border-top: 1px solid #E2E8F0;
+  background: #fff;
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.customer-chat-footer input {
+  flex: 1;
+  border: 1px solid #E2E8F0;
+  border-radius: 999px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.customer-chat-footer input:focus {
+  border-color: #2D76FF;
+  box-shadow: 0 0 0 3px rgba(45, 118, 255, 0.12);
+}
+
+.customer-chat-footer input::placeholder {
+  color: #94A3B8;
+}
+
+.customer-chat-footer button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0 18px;
+  background: #2D76FF;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customer-chat-footer button:hover:not(:disabled) {
+  background: #1F66EC;
+}
+
+.customer-chat-footer button:disabled {
+  background: #CBD5E1;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+  .cs-popup-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .customer-chat {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    height: 75vh;
+    max-height: 75vh;
+    border-radius: 20px 20px 0 0;
+    margin: 0 12px;
+  }
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Heart, Star, Trash2 } from 'lucide-react'
 import { api } from '../lib/api'
+import { saved as savedCopy } from '../data/uiCopy'
 
 export default function SavedPage() {
   const [items, setItems] = useState([])
@@ -26,22 +27,22 @@ export default function SavedPage() {
   return (
     <div className="dashboard-layout">
       <div className="dashboard-header">
-        <h1>Saved Services</h1>
-        <p>Your favorite services in one place</p>
+        <h1>{savedCopy.title}</h1>
+        <p>{savedCopy.subtitle}</p>
       </div>
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>
-          <p style={{ color: 'var(--text-secondary)' }}>Loading saved services...</p>
+          <p style={{ color: 'var(--text-secondary)' }}>{savedCopy.loading}</p>
         </div>
       ) : items.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">
             <Heart size={32} />
           </div>
-          <h2>No saved services yet</h2>
-          <p>Save services you like to compare them later and easily find them again.</p>
-          <Link to="/app/search" className="btn btn-primary">Explore Services</Link>
+          <h2>{savedCopy.noSavedYet}</h2>
+          <p>{savedCopy.noSavedDesc}</p>
+          <Link to="/app/search" className="btn btn-primary">{savedCopy.exploreServices}</Link>
         </div>
       ) : (
         <div className="services-grid">
@@ -91,7 +92,7 @@ export default function SavedPage() {
                   </div>
                   <div className="gig-card-footer">
                     <div className="gig-card-price">
-                      <span className="price-label">From</span>
+                      <span className="price-label">{savedCopy.from}</span>
                       <span className="price-value">Rp{Number(item.price || 0).toLocaleString('id-ID')}</span>
                     </div>
                   </div>

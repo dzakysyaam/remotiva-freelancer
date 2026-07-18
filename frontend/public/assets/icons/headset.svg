@@ -1,0 +1,12 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Headset arc top -->
+  <path d="M8 20C8 12.268 14.268 6 22 6C29.732 6 36 12.268 36 20" stroke="#222325" stroke-width="2" stroke-linecap="round"/>
+  <!-- Left ear pad -->
+  <rect x="4" y="18" width="6" height="12" rx="3" stroke="#222325" stroke-width="1.8" fill="none"/>
+  <!-- Right ear pad -->
+  <rect x="30" y="18" width="6" height="12" rx="3" stroke="#222325" stroke-width="1.8" fill="none"/>
+  <!-- Microphone arm -->
+  <path d="M8 24V30C8 31.5 9.5 33 12 33" stroke="#222325" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Microphone head -->
+  <circle cx="13" cy="32" r="2.5" stroke="#222325" stroke-width="1.5" fill="none"/>
+</svg>

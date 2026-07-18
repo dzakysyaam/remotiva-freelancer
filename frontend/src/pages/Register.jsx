@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { api, session } from '../lib/api'
 import { Logo } from '../components/brand'
+import AuthMascot from '../components/auth/AuthMascot'
+import { auth, roles } from '../data/uiCopy'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -16,7 +18,7 @@ export default function Register() {
     setError('')
 
     if (form.password.length < 6) {
-      setError('Password must be at least 6 characters')
+      setError(auth.passwordMinChars)
       return
     }
 
@@ -25,9 +27,17 @@ export default function Register() {
       const res = await api.register(form)
       session.token = res.token
       session.user = res.user
-      navigate('/app')
+
+      // Redirect based on role after registration
+      if (res.user.role === 'buyer') {
+        navigate('/app/buyer')
+      } else if (res.user.role === 'seller') {
+        navigate('/app/seller')
+      } else {
+        navigate('/app')
+      }
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.')
+      setError(err.message || 'Pendaftaran gagal. Silakan coba lagi.')
     } finally {
       setLoading(false)
     }
@@ -35,77 +45,75 @@ export default function Register() {
 
   return (
     <div className="auth-container">
-      {/* Left side - Visual Panel */}
-      <div className="auth-left">
-        <div className="auth-brand">
-          <Logo variant="inverse" size="md" />
+      <div className="auth-hero">
+        <div className="auth-hero-bg">
+          <div className="auth-bg-orb auth-bg-orb-1" />
+          <div className="auth-bg-orb auth-bg-orb-2" />
         </div>
-        <div className="auth-left-content">
-          <h1>Join thousands of professionals on Remotiva</h1>
-          <p>Create your account today and start working with talented freelancers or showcase your skills to clients worldwide.</p>
-        </div>
-        {/* Visual illustration using account asset */}
-        <div className="auth-visual">
-          <img
-            src="/assets/account.jpg"
-            alt="Account management"
-            className="auth-image"
-          />
+        <div className="auth-hero-inner">
+          <div className="auth-hero-logo">
+            <Logo size="xl" variant="inverse" />
+          </div>
+          <div className="auth-hero-content">
+            <h1>Wujudkan karir freelance Anda bersama Remotiva</h1>
+            <p>Temukan project, bangun reputasi, dan kelola pekerjaan Anda di satu tempat</p>
+          </div>
+          <AuthMascot />
         </div>
       </div>
 
-      {/* Right side - Register Form */}
-      <div className="auth-right">
-        <div className="auth-form-container">
+      <div className="auth-form-panel">
+        <div className="auth-form-card">
           <div className="auth-form-header">
-            <h2>Create an account</h2>
-            <p>Fill in your details to get started</p>
+            <h2>{auth.registerTitle}</h2>
+            <p>{auth.registerSubtitle}</p>
           </div>
 
           <form onSubmit={submit}>
             <div className="form-group">
-              <label htmlFor="name">Full name</label>
+              <label htmlFor="name">{auth.fullName}</label>
               <input
                 id="name"
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="John Doe"
+                placeholder="Masukkan nama lengkap"
                 required
                 autoComplete="name"
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="email">Email address</label>
+              <label htmlFor="email">{auth.email}</label>
               <input
                 id="email"
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@example.com"
+                placeholder="nama@email.com"
                 required
                 autoComplete="email"
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{auth.password}</label>
               <div className="password-input-wrapper">
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="Create a strong password"
+                  placeholder="Minimal 6 karakter"
                   required
                   minLength={6}
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
                   className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -113,34 +121,31 @@ export default function Register() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="role">I want to</label>
+              <label htmlFor="role">{auth.registerAs}</label>
               <select
                 id="role"
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
               >
-                <option value="buyer">Find services and hire freelancers</option>
-                <option value="seller">Offer my services as a freelancer</option>
+                <option value="buyer">{roles.buyer}</option>
+                <option value="seller">{roles.seller}</option>
               </select>
             </div>
 
-            {error && <p className="form-error">{error}</p>}
+            {error && <div className="form-error">{error}</div>}
 
-            <button
-              type="submit"
-              className="btn btn-primary btn-lg auth-submit"
-              disabled={loading}
-            >
-              {loading ? 'Creating account...' : 'Continue'}
+            <button type="submit" className="btn btn-primary btn-auth" disabled={loading}>
+              {loading ? 'Mendaftar...' : auth.registerButton}
             </button>
 
             <p className="auth-terms">
-              By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+              {auth.termsText} <a href="#">{auth.termsOfService}</a> dan <a href="#">{auth.privacyPolicy}</a>.
             </p>
           </form>
 
           <div className="auth-footer">
-            Already have an account? <Link to="/auth/login">Sign in</Link>
+            <span>{auth.alreadyHaveAccount}</span>
+            <Link to="/auth/login">{auth.signInHere}</Link>
           </div>
         </div>
       </div>

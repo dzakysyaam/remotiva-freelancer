@@ -7,3 +7,6 @@ from app.routers.saved import router as saved_router
 from app.routers.messages import router as messages_router
 from app.routers.profile import router as profile_router
 from app.routers.payments import router as payments_router
+from app.routers.admin import router as admin_router
+from app.routers.customer_service import router as customer_service_router
+from app.routers.admin_cs import router as admin_cs_router

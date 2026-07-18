@@ -1,0 +1,27 @@
+# robots.txt for Remotiva
+#
+# IMPORTANT: This only affects polite crawlers.
+# Malicious bots and scrapers will ignore this file.
+# For real protection, use Cloudflare WAF or similar services.
+
+User-agent: *
+Allow: /
+
+# Disallow internal API endpoints
+Disallow: /api/
+
+# Disallow admin and dashboard routes
+Disallow: /app/admin
+Disallow: /app/seller
+Disallow: /app/buyer
+
+# Disallow checkout and auth routes
+Disallow: /app/checkout
+Disallow: /auth/
+
+# Allow search and browse
+Allow: /app/search
+Allow: /app/categories
+
+# Sitemap (if you have one, uncomment and add URL)
+# Sitemap: https://remotiva.id/sitemap.xml

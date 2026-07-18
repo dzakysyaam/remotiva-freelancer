@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { MessageSquare, Clock } from 'lucide-react'
 import { api } from '../lib/api'
+import { inbox as inboxCopy } from '../data/uiCopy'
 
 export default function InboxPage() {
   const [messages, setMessages] = useState([])
@@ -16,28 +17,28 @@ export default function InboxPage() {
   return (
     <div className="inbox-layout">
       <div className="inbox-header">
-        <h1>Messages</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Stay connected with freelancers and clients</p>
+        <h1>{inboxCopy.title}</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>{inboxCopy.subtitle}</p>
       </div>
 
       <div className="conversations-list">
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
-            <p style={{ color: 'var(--text-secondary)' }}>Loading messages...</p>
+            <p style={{ color: 'var(--text-secondary)' }}>{inboxCopy.loading}</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">
               <MessageSquare size={48} />
             </div>
-            <h2>No messages yet</h2>
-            <p>Start a conversation by placing an order or contacting a freelancer.</p>
+            <h2>{inboxCopy.noMessagesYet}</h2>
+            <p>{inboxCopy.noMessagesDesc}</p>
           </div>
         ) : (
           messages.map(item => (
             <div key={item.id} className="conversation">
               <div className="conversation-avatar">
-                {item.initial || item.sender_name?.[0]?.toUpperCase() || 'U'}
+                {item.initial || item.sender_name?.[0]?.toUpperCase() || 'P'}
               </div>
               <div className="conversation-content">
                 <div className="conversation-header">

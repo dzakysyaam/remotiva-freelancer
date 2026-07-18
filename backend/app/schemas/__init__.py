@@ -21,6 +21,7 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
+    is_active: bool = True
     created_at: Optional[datetime] = None
 
     class Config:
@@ -77,6 +78,7 @@ class OrderResponse(BaseModel):
     package_name: str
     status: str
     total_price: float
+    payment_status: Optional[str] = None
     created_at: datetime
 
     class Config:
@@ -127,13 +129,93 @@ class UpdatedResponse(BaseModel):
 
 # Payment Schemas
 class PaymentCreate(BaseModel):
-    service_id: int
-    package_name: str = "Standard"
+    order_id: int
+    method: str = "virtual_account"
 
 
 class PaymentResponse(BaseModel):
+    id: int
+    order_id: int
+    method: str
+    amount: float
+    fee: float
+    total_amount: float
     status: str
-    order_id: Optional[int] = None
+    payment_code: Optional[str] = None
+    va_number: Optional[str] = None
+    expiry_time: Optional[datetime] = None
+    created_at: datetime
+    paid_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class PaymentStatusResponse(BaseModel):
+    status: str
+    message: str
+
+
+# Customer Service Schemas
+class CSThreadCreate(BaseModel):
+    subject: str = Field(..., min_length=1, max_length=255)
+
+
+class CSThreadResponse(BaseModel):
+    id: int
+    user_id: int
+    user_name: Optional[str] = None
+    subject: str
+    status: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    last_message: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class CSMessageCreate(BaseModel):
+    message: str = Field(..., min_length=1)
+
+
+class CSMessageResponse(BaseModel):
+    id: int
+    thread_id: int
+    sender_id: int
+    sender_role: str
+    sender_name: Optional[str] = None
+    message: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CSStatusUpdate(BaseModel):
+    status: str
+
+
+# Admin Schemas
+class UserListResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    role: str
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UserRoleUpdate(BaseModel):
+    role: str
+
+
+class UserToggleResponse(BaseModel):
+    id: int
+    is_active: bool
 
 
 # Health

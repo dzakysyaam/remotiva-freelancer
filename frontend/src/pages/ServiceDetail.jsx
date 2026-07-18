@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Star, Clock, Heart, Check, MessageSquare, Share2, ArrowLeft, CreditCard, Building2, Smartphone, Lock, CheckCircle } from 'lucide-react'
-import { api } from '../lib/api'
-
-const paymentMethods = [
-  { id: 'card', name: 'Credit/Debit Card', desc: 'Visa, Mastercard, JCB', icon: CreditCard },
-  { id: 'bank', name: 'Bank Transfer', desc: 'BCA, Mandiri, BNI, BRI', icon: Building2 },
-  { id: 'ewallet', name: 'E-Wallet', desc: 'GoPay, OVO, Dana', icon: Smartphone },
-]
+import { Star, Clock, Heart, Check, MessageSquare, Share2, ArrowLeft, CreditCard, Shield } from 'lucide-react'
+import { api, session } from '../lib/api'
+import { serviceDetail } from '../data/uiCopy'
 
 const packages = {
   Basic: { revisions: 1, priceMultiplier: 0.7 },
@@ -21,12 +16,6 @@ export default function ServiceDetail() {
   const [item, setItem] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedPackage, setSelectedPackage] = useState('Standard')
-  const [selectedPayment, setSelectedPayment] = useState('card')
-  const [showCheckout, setShowCheckout] = useState(false)
-  const [processing, setProcessing] = useState(false)
-  const [orderComplete, setOrderComplete] = useState(false)
-  const [orderId, setOrderId] = useState('')
-  const [cardForm, setCardForm] = useState({ number: '', name: '', expiry: '', cvv: '' })
 
   useEffect(() => {
     api.service(id)
@@ -43,40 +32,17 @@ export default function ServiceDetail() {
     }
   }
 
-  async function handleCheckout() {
-    setProcessing(true)
-    try {
-      await api.createOrder({ service_id: Number(id), package_name: selectedPackage })
-      const ref = 'ORD-' + Date.now().toString(36).toUpperCase()
-      setOrderId(ref)
-      setOrderComplete(true)
-      setTimeout(() => navigate('/app/orders'), 3000)
-    } catch (err) {
-      console.error('Failed to create order:', err)
-    } finally {
-      setProcessing(false)
-    }
-  }
-
   function getPrice() {
     if (!item) return 0
     const multiplier = packages[selectedPackage].priceMultiplier
     return Math.round(item.price * multiplier)
   }
 
-  function formatCardNumber(value) {
-    return value.replace(/\D/g, '').substring(0, 16).replace(/(.{4})/g, '$1 ').trim()
-  }
-
-  function formatExpiry(value) {
-    return value.replace(/\D/g, '').substring(0, 4).replace(/^(\d{2})(\d)/, '$1/$2')
-  }
-
   if (loading) {
     return (
       <div className="detail-layout">
         <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px' }}>
-          <p style={{ color: 'var(--text-secondary)' }}>Loading service details...</p>
+          <p style={{ color: 'var(--text-secondary)' }}>{serviceDetail.loadingService}</p>
         </div>
       </div>
     )
@@ -94,158 +60,9 @@ export default function ServiceDetail() {
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
             </div>
-            <h2>Service Not Found</h2>
-            <p>The service you're looking for doesn't exist or has been removed.</p>
-            <button onClick={() => navigate('/app/search')} className="btn btn-primary">Browse Services</button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (orderComplete) {
-    return (
-      <div className="checkout-layout" style={{ gridTemplateColumns: '1fr' }}>
-        <div className="checkout-section" style={{ textAlign: 'center', padding: '64px' }}>
-          <div className="trust-icon" style={{ width: '80px', height: '80px', margin: '0 auto 24px' }}>
-            <CheckCircle size={40} style={{ color: '#1dbf73' }} />
-          </div>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>Order Placed Successfully!</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>Thank you for your order. The seller will start working on your project soon.</p>
-          <div style={{ background: 'var(--bg-secondary)', padding: '12px 24px', borderRadius: '8px', display: 'inline-block', marginBottom: '16px' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 600 }}>Order ID: {orderId}</span>
-          </div>
-          <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Redirecting to orders...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (showCheckout) {
-    return (
-      <div className="checkout-layout">
-        <div className="checkout-main">
-          <div className="checkout-section">
-            <h3>
-              <CreditCard size={20} />
-              Payment Method
-            </h3>
-            <div className="payment-methods">
-              {paymentMethods.map(method => {
-                const Icon = method.icon
-                return (
-                  <div
-                    key={method.id}
-                    className={`payment-method ${selectedPayment === method.id ? 'active' : ''}`}
-                    onClick={() => setSelectedPayment(method.id)}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={selectedPayment === method.id}
-                      onChange={() => setSelectedPayment(method.id)}
-                    />
-                    <div className="payment-method-icon">
-                      <Icon size={20} />
-                    </div>
-                    <div className="payment-method-info">
-                      <div className="payment-method-name">{method.name}</div>
-                      <div className="payment-method-desc">{method.desc}</div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {selectedPayment === 'card' && (
-            <div className="checkout-section">
-              <h3>Card Details</h3>
-              <div className="card-form">
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Card Number</label>
-                  <input
-                    type="text"
-                    placeholder="1234 5678 9012 3456"
-                    value={cardForm.number}
-                    onChange={(e) => setCardForm({ ...cardForm, number: formatCardNumber(e.target.value) })}
-                  />
-                </div>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label>Cardholder Name</label>
-                  <input
-                    type="text"
-                    placeholder="John Doe"
-                    value={cardForm.name}
-                    onChange={(e) => setCardForm({ ...cardForm, name: e.target.value })}
-                  />
-                </div>
-                <div className="card-form-row">
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>Expiry Date</label>
-                    <input
-                      type="text"
-                      placeholder="MM/YY"
-                      value={cardForm.expiry}
-                      onChange={(e) => setCardForm({ ...cardForm, expiry: formatExpiry(e.target.value) })}
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label>CVV</label>
-                    <input
-                      type="text"
-                      placeholder="123"
-                      value={cardForm.cvv}
-                      onChange={(e) => setCardForm({ ...cardForm, cvv: e.target.value.replace(/\D/g, '').substring(0, 4) })}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button onClick={() => setShowCheckout(false)} className="btn btn-secondary">
-              <ArrowLeft size={18} />
-              Back
-            </button>
-          </div>
-        </div>
-
-        <div className="checkout-sidebar">
-          <div className="order-summary">
-            <h3>Order Summary</h3>
-            <div className="summary-service">
-              <img src={item.image_url} alt={item.title} />
-              <div className="summary-service-info">
-                <h4>{item.title}</h4>
-                <p>{selectedPackage} Package</p>
-              </div>
-            </div>
-            <div className="summary-item">
-              <span>Service Price</span>
-              <span>Rp{getPrice().toLocaleString('id-ID')}</span>
-            </div>
-            <div className="summary-item">
-              <span>Platform Fee (5%)</span>
-              <span>Rp{Math.round(getPrice() * 0.05).toLocaleString('id-ID')}</span>
-            </div>
-            <div className="summary-total">
-              <span>Total</span>
-              <span>Rp{Math.round(getPrice() * 1.05).toLocaleString('id-ID')}</span>
-            </div>
-            <button
-              className="btn btn-primary btn-lg"
-              style={{ width: '100%', marginTop: '20px', background: '#1dbf73' }}
-              onClick={handleCheckout}
-              disabled={processing}
-            >
-              <Lock size={18} />
-              {processing ? 'Processing...' : 'Pay Now'}
-            </button>
-            <p style={{ fontSize: '0.75rem', color: 'var(--muted)', textAlign: 'center', marginTop: '12px' }}>
-              Your payment is protected. Money is released only when you approve the delivery.
-            </p>
+            <h2>{serviceDetail.serviceNotFound}</h2>
+            <p>{serviceDetail.serviceNotFoundDesc}</p>
+            <button onClick={() => navigate('/app/search')} className="btn btn-primary">{serviceDetail.browseServices}</button>
           </div>
         </div>
       </div>
@@ -259,7 +76,7 @@ export default function ServiceDetail() {
           <button onClick={() => navigate(-1)} className="btn btn-ghost" style={{ padding: '8px' }}>
             <ArrowLeft size={18} />
           </button>
-          <a href="/app/search">All Services</a>
+          <a href="/app/search">{serviceDetail.allServices}</a>
           <span>/</span>
           <span>{item.title}</span>
         </div>
@@ -274,7 +91,7 @@ export default function ServiceDetail() {
             </span>
             <span className="badge badge-delivery">
               <Clock size={14} />
-              {item.delivery_days} days delivery
+              {item.delivery_days} {serviceDetail.daysDelivery}
             </span>
           </div>
 
@@ -295,7 +112,7 @@ export default function ServiceDetail() {
                 </div>
                 <div className="seller-stat">
                   <Clock size={16} />
-                  <span>{item.delivery_days} days</span>
+                  <span>{item.delivery_days} {serviceDetail.days}</span>
                 </div>
               </div>
             </div>
@@ -306,7 +123,7 @@ export default function ServiceDetail() {
       <div className="detail-sidebar">
         <div className="order-card">
           <div className="order-header">
-            <h3>Select Package</h3>
+            <h3>{serviceDetail.selectPackage}</h3>
           </div>
 
           <div className="package-options">
@@ -317,44 +134,52 @@ export default function ServiceDetail() {
                 onClick={() => setSelectedPackage(name)}
               >
                 <h4>{name}</h4>
-                <span>{pkg.revisions === 99 ? 'Unlimited' : `${pkg.revisions} revision${pkg.revisions > 1 ? 's' : ''}`}</span>
+                <span>{pkg.revisions === 99 ? serviceDetail.unlimited : `${pkg.revisions} ${pkg.revisions > 1 ? serviceDetail.revisions : serviceDetail.revision}`}</span>
               </div>
             ))}
           </div>
 
           <div className="order-price">
-            <span>Total price</span>
+            <span>{serviceDetail.totalPrice}</span>
             <strong>Rp{getPrice().toLocaleString('id-ID')}</strong>
           </div>
 
           <ul className="order-features">
-            <li><Check size={18} /> Source files included</li>
-            <li><Check size={18} /> Commercial use</li>
-            <li><Check size={18} /> {item.delivery_days} day delivery</li>
-            <li><Check size={18} /> {packages[selectedPackage].revisions === 99 ? 'Unlimited' : packages[selectedPackage].revisions} revision{packages[selectedPackage].revisions !== 1 ? 's' : ''}</li>
+            <li><Check size={18} /> {serviceDetail.sourceFiles}</li>
+            <li><Check size={18} /> {serviceDetail.commercialUse}</li>
+            <li><Check size={18} /> {item.delivery_days} {serviceDetail.daysDelivery}</li>
+            <li><Check size={18} /> {packages[selectedPackage].revisions === 99 ? serviceDetail.unlimited : `${packages[selectedPackage].revisions} ${packages[selectedPackage].revisions !== 1 ? serviceDetail.revisions : serviceDetail.revision}`}</li>
           </ul>
 
-          <button
-            className="btn btn-primary btn-lg"
-            style={{ width: '100%', background: '#1dbf73' }}
-            onClick={() => setShowCheckout(true)}
-          >
-            Continue
-          </button>
+          {session.user?.role === 'buyer' ? (
+            <button
+              className="btn btn-primary btn-lg"
+              style={{ width: '100%', background: '#2D76FF' }}
+              onClick={() => navigate(`/app/checkout/${id}?package=${selectedPackage}`)}
+            >
+              <CreditCard size={18} />
+              {serviceDetail.continueToCheckout}
+            </button>
+          ) : (
+            <div className="view-only-badge">
+              <Shield size={16} />
+              {session.user?.role === 'admin' ? serviceDetail.adminPreview : serviceDetail.sellerView}
+            </div>
+          )}
         </div>
 
         <div className="actions-card">
           <button className="btn btn-secondary" onClick={handleSave}>
             <Heart size={18} />
-            Save for Later
+            {serviceDetail.saveForLater}
           </button>
           <button className="btn btn-secondary">
             <MessageSquare size={18} />
-            Contact Seller
+            {serviceDetail.contactSeller}
           </button>
           <button className="btn btn-secondary">
             <Share2 size={18} />
-            Share Service
+            {serviceDetail.shareService}
           </button>
         </div>
       </div>

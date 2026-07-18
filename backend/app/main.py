@@ -14,8 +14,12 @@ from app.routers import (
     messages_router,
     profile_router,
     payments_router,
+    admin_router,
+    customer_service_router,
+    admin_cs_router,
 )
 from app.schemas import HealthResponse
+from app.rate_limiter import rate_limiter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +28,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Remotiva API",
     description="Freelance Marketplace API",
-    version="1.0.0",
+    version="2.0.0",
 )
 
 # CORS configuration
@@ -32,8 +36,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://localhost:4173",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
         "http://127.0.0.1:4173",
     ],
     allow_credentials=True,
@@ -52,7 +58,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Health check endpoint (public)
+# Health check endpoint (public, no rate limit)
 @app.get("/api/health", response_model=HealthResponse, tags=["health"])
 async def health_check():
     """Health check endpoint."""
@@ -69,6 +75,9 @@ app.include_router(saved_router)
 app.include_router(messages_router)
 app.include_router(profile_router)
 app.include_router(payments_router)
+app.include_router(admin_router)
+app.include_router(customer_service_router)
+app.include_router(admin_cs_router)
 
 
 if __name__ == "__main__":

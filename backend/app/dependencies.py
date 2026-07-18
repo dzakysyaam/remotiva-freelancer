@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.database import get_db
 from app.security import extract_token_from_header, decode_access_token
@@ -51,7 +52,7 @@ async def get_current_user(
 async def get_optional_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
-) -> User | None:
+) -> Optional[User]:
     """Get current user if authenticated, otherwise None."""
     if credentials is None:
         return None
@@ -67,3 +68,21 @@ async def get_optional_user(
         return None
 
     return db.query(User).filter(User.id == user_id).first()
+
+
+def require_role(allowed_roles: list):
+    """Dependency factory for role-based access control."""
+    async def role_checker(current_user: User = Depends(get_current_user)) -> User:
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required roles: {', '.join(allowed_roles)}",
+            )
+        return current_user
+    return role_checker
+
+
+# Convenience dependencies for common role checks
+require_admin = require_role(["admin"])
+require_buyer_or_seller = require_role(["buyer", "seller"])
+require_seller = require_role(["seller"])

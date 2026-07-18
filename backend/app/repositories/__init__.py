@@ -1,17 +1,26 @@
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from datetime import datetime, timedelta
 import json
+import random
+import string
 
-from app.models import User, Category, Service, SavedService, Order, Message, UserProfile
+from app.models import User, Category, Service, SavedService, Order, Message, UserProfile, CustomerServiceThread, CustomerServiceMessage, Payment
 
 
 class UserRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_user(self, name: str, email: str, password_hash: str, role: str = "buyer") -> User:
-        user = User(name=name, email=email, password_hash=password_hash, role=role)
+    def create_user(self, name: str, email: str, password_hash: str, role: str = "buyer", is_active: bool = True) -> User:
+        user = User(
+            name=name,
+            email=email,
+            password_hash=password_hash,
+            role=role,
+            is_active=is_active
+        )
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
@@ -25,6 +34,25 @@ class UserRepository:
 
     def get_user_by_id(self, user_id: int) -> Optional[User]:
         return self.db.query(User).filter(User.id == user_id).first()
+
+    def get_all_users(self) -> List[User]:
+        return self.db.query(User).order_by(User.created_at.desc()).all()
+
+    def toggle_user_active(self, user_id: int) -> Optional[User]:
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if user:
+            user.is_active = not user.is_active
+            self.db.commit()
+            self.db.refresh(user)
+        return user
+
+    def update_user_role(self, user_id: int, new_role: str) -> Optional[User]:
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if user:
+            user.role = new_role
+            self.db.commit()
+            self.db.refresh(user)
+        return user
 
 
 class CategoryRepository:
@@ -111,6 +139,31 @@ class ServiceRepository:
         service = self.db.query(Service.price).filter(Service.id == service_id).first()
         return float(service.price) if service else None
 
+    def get_seller_services(self, seller_id: int) -> List[dict]:
+        """Get all services for a seller."""
+        return (
+            self.db.query(
+                Service.id,
+                Service.category_id,
+                Category.slug.label("category_slug"),
+                Service.seller_id,
+                User.name.label("seller_name"),
+                User.seller_level,
+                Service.title,
+                Service.description,
+                Service.image_url,
+                Service.price,
+                Service.rating,
+                Service.delivery_days,
+                Service.is_featured,
+            )
+            .join(Category, Category.id == Service.category_id)
+            .join(User, User.id == Service.seller_id)
+            .filter(Service.seller_id == seller_id)
+            .order_by(Service.created_at.desc())
+            .all()
+        )
+
 
 class SavedServiceRepository:
     def __init__(self, db: Session):
@@ -170,7 +223,7 @@ class OrderRepository:
         self.db = db
 
     def get_user_orders(self, user_id: int) -> List[dict]:
-        return (
+        orders = (
             self.db.query(
                 Order.id,
                 Order.service_id,
@@ -185,6 +238,23 @@ class OrderRepository:
             .order_by(Order.created_at.desc())
             .all()
         )
+
+        # Get payment status for each order
+        result = []
+        for o in orders:
+            payment = self.db.query(Payment).filter(Payment.order_id == o.id).first()
+            order_dict = {
+                "id": o.id,
+                "service_id": o.service_id,
+                "service_title": o.service_title,
+                "package_name": o.package_name,
+                "status": o.status,
+                "total_price": o.total_price,
+                "created_at": o.created_at,
+                "payment_status": payment.status if payment else None
+            }
+            result.append(order_dict)
+        return result
 
     def create_order(self, user_id: int, service_id: int, package_name: str) -> Order:
         price = self.db.query(Service.price).filter(Service.id == service_id).scalar()
@@ -273,3 +343,242 @@ class UserProfileRepository:
             profile.interests = interests
         self.db.commit()
         return True
+
+
+class CustomerServiceRepository:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_user_threads(self, user_id: int) -> List[dict]:
+        threads = (
+            self.db.query(CustomerServiceThread)
+            .filter(CustomerServiceThread.user_id == user_id)
+            .order_by(CustomerServiceThread.updated_at.desc())
+            .all()
+        )
+
+        result = []
+        for t in threads:
+            last_msg = (
+                self.db.query(CustomerServiceMessage)
+                .filter(CustomerServiceMessage.thread_id == t.id)
+                .order_by(CustomerServiceMessage.created_at.desc())
+                .first()
+            )
+            user = self.db.query(User).filter(User.id == t.user_id).first()
+            result.append({
+                "id": t.id,
+                "user_id": t.user_id,
+                "user_name": user.name if user else "Unknown",
+                "subject": t.subject,
+                "status": t.status,
+                "created_at": t.created_at,
+                "updated_at": t.updated_at,
+                "last_message": last_msg.message if last_msg else None
+            })
+        return result
+
+    def get_all_threads(self, status_filter: Optional[str] = None) -> List[dict]:
+        q = self.db.query(CustomerServiceThread)
+        if status_filter:
+            q = q.filter(CustomerServiceThread.status == status_filter)
+        threads = q.order_by(CustomerServiceThread.updated_at.desc()).all()
+
+        result = []
+        for t in threads:
+            last_msg = (
+                self.db.query(CustomerServiceMessage)
+                .filter(CustomerServiceMessage.thread_id == t.id)
+                .order_by(CustomerServiceMessage.created_at.desc())
+                .first()
+            )
+            user = self.db.query(User).filter(User.id == t.user_id).first()
+            result.append({
+                "id": t.id,
+                "user_id": t.user_id,
+                "user_name": user.name if user else "Unknown",
+                "user_role": user.role if user else None,
+                "subject": t.subject,
+                "status": t.status,
+                "created_at": t.created_at,
+                "updated_at": t.updated_at,
+                "last_message": last_msg.message if last_msg else None
+            })
+        return result
+
+    def get_thread(self, thread_id: int) -> Optional[CustomerServiceThread]:
+        return self.db.query(CustomerServiceThread).filter(CustomerServiceThread.id == thread_id).first()
+
+    def get_thread_by_user(self, thread_id: int, user_id: int) -> Optional[CustomerServiceThread]:
+        return (
+            self.db.query(CustomerServiceThread)
+            .filter(
+                CustomerServiceThread.id == thread_id,
+                CustomerServiceThread.user_id == user_id
+            )
+            .first()
+        )
+
+    def create_thread(self, user_id: int, subject: str) -> CustomerServiceThread:
+        thread = CustomerServiceThread(
+            user_id=user_id,
+            subject=subject,
+            status="open"
+        )
+        self.db.add(thread)
+        self.db.commit()
+        self.db.refresh(thread)
+        return thread
+
+    def update_thread_status(self, thread_id: int, status: str) -> Optional[CustomerServiceThread]:
+        thread = self.db.query(CustomerServiceThread).filter(CustomerServiceThread.id == thread_id).first()
+        if thread:
+            thread.status = status
+            self.db.commit()
+            self.db.refresh(thread)
+        return thread
+
+    def get_thread_messages(self, thread_id: int) -> List[dict]:
+        messages = (
+            self.db.query(CustomerServiceMessage)
+            .filter(CustomerServiceMessage.thread_id == thread_id)
+            .order_by(CustomerServiceMessage.created_at.asc())
+            .all()
+        )
+
+        result = []
+        for m in messages:
+            sender = self.db.query(User).filter(User.id == m.sender_id).first()
+            result.append({
+                "id": m.id,
+                "thread_id": m.thread_id,
+                "sender_id": m.sender_id,
+                "sender_role": m.sender_role,
+                "sender_name": sender.name if sender else "Unknown",
+                "message": m.message,
+                "created_at": m.created_at
+            })
+        return result
+
+    def create_message(self, thread_id: int, sender_id: int, sender_role: str, message: str) -> CustomerServiceMessage:
+        msg = CustomerServiceMessage(
+            thread_id=thread_id,
+            sender_id=sender_id,
+            sender_role=sender_role,
+            message=message
+        )
+        self.db.add(msg)
+
+        # Update thread updated_at
+        thread = self.db.query(CustomerServiceThread).filter(CustomerServiceThread.id == thread_id).first()
+        if thread:
+            thread.updated_at = datetime.utcnow()
+
+        self.db.commit()
+        self.db.refresh(msg)
+        return msg
+
+
+class PaymentRepository:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def generate_payment_code(self) -> str:
+        """Generate unique payment code."""
+        chars = string.ascii_uppercase + string.digits
+        return ''.join(random.choices(chars, k=12))
+
+    def generate_va_number(self) -> str:
+        """Generate mock VA number."""
+        return ''.join(random.choices(string.digits, k=16))
+
+    def create_payment(
+        self,
+        order_id: int,
+        user_id: int,
+        method: str,
+        amount: float,
+        fee: float = 0
+    ) -> Payment:
+        payment = Payment(
+            order_id=order_id,
+            user_id=user_id,
+            method=method,
+            amount=amount,
+            fee=fee,
+            total_amount=amount + fee,
+            status="pending",
+            payment_code=self.generate_payment_code(),
+            va_number=self.generate_va_number() if "va" in method.lower() or "virtual" in method.lower() else None,
+            expiry_time=datetime.utcnow() + timedelta(hours=24)
+        )
+        self.db.add(payment)
+        self.db.commit()
+        self.db.refresh(payment)
+        return payment
+
+    def get_payment(self, payment_id: int) -> Optional[Payment]:
+        return self.db.query(Payment).filter(Payment.id == payment_id).first()
+
+    def get_user_payments(self, user_id: int) -> List[Payment]:
+        return (
+            self.db.query(Payment)
+            .filter(Payment.user_id == user_id)
+            .order_by(Payment.created_at.desc())
+            .all()
+        )
+
+    def get_order_payment(self, order_id: int) -> Optional[Payment]:
+        return (
+            self.db.query(Payment)
+            .filter(Payment.order_id == order_id)
+            .first()
+        )
+
+    def mark_paid(self, payment_id: int) -> Optional[Payment]:
+        payment = self.db.query(Payment).filter(Payment.id == payment_id).first()
+        if payment:
+            payment.status = "paid"
+            payment.paid_at = datetime.utcnow()
+
+            # Update order status
+            order = self.db.query(Order).filter(Order.id == payment.order_id).first()
+            if order:
+                order.status = "In Progress"
+
+            self.db.commit()
+            self.db.refresh(payment)
+        return payment
+
+    def mark_failed(self, payment_id: int) -> Optional[Payment]:
+        payment = self.db.query(Payment).filter(Payment.id == payment_id).first()
+        if payment:
+            payment.status = "failed"
+            self.db.commit()
+            self.db.refresh(payment)
+        return payment
+
+    def mark_expired(self, payment_id: int) -> Optional[Payment]:
+        payment = self.db.query(Payment).filter(Payment.id == payment_id).first()
+        if payment:
+            payment.status = "expired"
+            self.db.commit()
+            self.db.refresh(payment)
+        return payment
+
+    def get_stats(self) -> dict:
+        """Get payment statistics for admin."""
+        total = self.db.query(Payment).count()
+        pending = self.db.query(Payment).filter(Payment.status == "pending").count()
+        paid = self.db.query(Payment).filter(Payment.status == "paid").count()
+        failed = self.db.query(Payment).filter(Payment.status == "failed").count()
+
+        total_amount = self.db.query(func.sum(Payment.total_amount)).filter(Payment.status == "paid").scalar() or 0
+
+        return {
+            "total": total,
+            "pending": pending,
+            "paid": paid,
+            "failed": failed,
+            "total_paid_amount": float(total_amount)
+        }
