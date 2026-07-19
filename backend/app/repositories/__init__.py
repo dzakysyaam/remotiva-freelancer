@@ -54,6 +54,18 @@ class UserRepository:
             self.db.refresh(user)
         return user
 
+    def delete_user(self, user_id: int) -> bool:
+        user = self.db.query(User).filter(User.id == user_id).first()
+        if user:
+            self.db.delete(user)
+            self.db.commit()
+            return True
+        return False
+
+    def user_exists_by_email(self, email: str) -> bool:
+        user = self.db.query(User).filter(User.email == email.lower()).first()
+        return user is not None
+
 
 class CategoryRepository:
     def __init__(self, db: Session):
@@ -370,6 +382,7 @@ class CustomerServiceRepository:
                 "id": t.id,
                 "user_id": t.user_id,
                 "user_name": user.name if user else "Unknown",
+                "user_role": user.role if user else None,
                 "subject": t.subject,
                 "status": t.status,
                 "created_at": t.created_at,

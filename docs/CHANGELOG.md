@@ -1,168 +1,177 @@
 # Changelog
 
-## [2.1.0] - 2026-07-18
+All notable changes to this project will be documented in this file.
 
-### Changed - UI Copy Localization
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-#### Frontend Changes
-- **Indonesian Localization**: Standardized all user-facing text to professional Indonesian
-  - Login/Register pages updated with Indonesian labels
-  - Buyer/Seller/Admin dashboards updated with Indonesian labels
-  - Checkout/Payment page updated with Indonesian labels
-  - Customer Service popup updated with Indonesian labels
-  - Service Detail page updated with Indonesian labels
-  - Navigation and footer updated with Indonesian labels
-
-- **Centralized UI Copy**: Added `frontend/src/data/uiCopy.js`
-  - Centralized all UI text for easy maintenance
-  - Added formatter functions for status/role display
-  - Professional Tokopedia-style Indonesian language
-
-- **Icon Consistency**: Synced Customer Service icon across all pages
-  - Dashboard action cards now use headset icon
-  - Customer Service popup uses headset icon
-  - Floating CS button uses headset icon
-  - Admin CS tab uses headset icon
-
-#### Status Label Translations
-| Backend Value | Indonesian Display |
-|-------------|-------------------|
-| pending | Menunggu |
-| in_progress | Diproses |
-| completed | Selesai |
-| cancelled | Dibatalkan |
-| paid | Sudah Dibayar |
-| failed | Gagal |
-| expired | Kedaluwarsa |
-
-#### Role Label Translations
-| Backend Value | Indonesian Display |
-|-------------|-------------------|
-| buyer | Pembeli |
-| seller | Penjual |
-| admin | Admin |
-
----
-
-## [2.0.0] - 2026-07-18
-
-### Added - Role-Based Dashboard System
-
-#### Database Changes
-- Added `is_active` column to users table
-- Added `updated_at` column to users table
-- Added admin seed user: `admin@remotiva.id`
-- Added `customer_service_threads` table
-- Added `customer_service_messages` table
-- Added `payments` table
-
-#### Backend Changes
-
-**Auth System**
-- `POST /api/auth/register` - Now rejects admin role from public registration
-- `POST /api/auth/login` - Returns `is_active` field, blocks inactive users
-- `GET /api/me` - Returns `is_active` field
-
-**New Admin APIs**
-- `GET /api/admin/users` - List all users (admin only)
-- `PATCH /api/admin/users/{id}/toggle-active` - Toggle user active/inactive
-- `PATCH /api/admin/users/{id}/role` - Update user role
-
-**New Customer Service APIs**
-- `GET /api/customer-service/threads` - User's CS threads
-- `POST /api/customer-service/threads` - Create new thread
-- `GET /api/customer-service/threads/{id}/messages` - Get thread messages
-- `POST /api/customer-service/threads/{id}/messages` - Send message
-- `GET /api/admin/customer-service/threads` - Admin: all threads
-- `POST /api/admin/customer-service/threads/{id}/messages` - Admin: reply
-- `PATCH /api/admin/customer-service/threads/{id}/status` - Admin: update status
-
-**New Payment Simulation APIs**
-- `GET /api/payments` - User's payment history
-- `POST /api/payments/create` - Create payment for order
-- `GET /api/payments/{id}` - Get payment details
-- `PATCH /api/payments/{id}/mark-paid` - Simulate payment success
-- `PATCH /api/payments/{id}/mark-failed` - Simulate payment failure
-
-#### Frontend Changes
-
-**New Routes**
-- `/app/buyer` - Buyer Dashboard
-- `/app/seller` - Seller Dashboard
-- `/app/admin` - Admin Dashboard
-
-**New Components**
-- `CustomerServiceButton` - Floating CS button
-- `CustomerServicePopup` - CS chat popup
-- `BuyerDashboard` - Buyer role dashboard
-- `SellerDashboard` - Seller role dashboard
-- `AdminDashboard` - Admin role dashboard with user management
-
-**Role-Based Access Control**
-- Buyers can only access `/app/buyer`
-- Sellers can only access `/app/seller`
-- Admins can only access `/app/admin`
-- Role guards redirect unauthorized access
-
-**Login/Register Updates**
-- Login redirects to role-specific dashboard
-- Register creates buyer or seller only (no admin)
-- Admin accounts only from database seed
-
-#### Payment Simulation (Midtrans-style)
-- Virtual Account (BCA, Mandiri, BNI)
-- Bank Transfer
-- E-Wallet (GoPay, OVO)
-- QRIS mock
-- Payment gateway modal UI
-- Simulated success/failure
-- No real card data collected
-
-#### Customer Service Features
-- Floating CS button on all dashboards
-- Chat popup with thread management
-- Admin CS inbox with reply capability
-- Thread status management (open/pending/closed)
-
----
-
-## [1.10.0] - 2026-07-18
-
-### Changed
-- **Footer Social Links**: Updated to user's personal accounts
-  - Twitter/X: `https://x.com/elonmusk`
-  - LinkedIn: `https://www.linkedin.com/in/muhammaddzakysyamhaidar`
-  - Instagram: `https://www.instagram.com/dzakysyaam`
-
-## [1.9.0] - 2026-07-18
-
-### Changed
-- **Gig Thumbnails**: Now use local Remotiva card assets
-  - Removed external Unsplash URLs
-  - Uses `/assets/card-remotiva-1.png` through `/assets/card-remotiva-7.png`
-  - Deterministic mapping by title keywords
-
-### Fixed
-- **Asset Filenames**: Renamed to cleaner format
-  - `card_remotiva (1).png` → `card-remotiva-1.png`
-
-## [1.8.0] - 2026-07-17
-
-### Changed
-- **Auth Mascot**: Complete redesign for professional look
-  - New large SVG illustration (320px)
-  - Friendly freelancer with floating project cards
-  - Remotiva blue accent in outfit
-  - SaaS-style flat design with shadows
-  - Multiple floating animations
-
-## [1.0.0] - 2026-07-14
+## [2.2.0] - 2026-07-19
 
 ### Added
-- Initial project structure
-- Python FastAPI backend
-- React frontend with Vite
-- Brand Logo component
-- Authentication pages (Login/Register)
+
+#### Enhanced Security
+- **Enhanced SecurityGuard component**
+  - Layer 1: Blocks DevTools keyboard shortcuts (F12, Ctrl+Shift+I/J/C, Ctrl+U)
+  - Layer 2: Blocks right-click context menu (allows in inputs)
+  - Layer 3: Detects when DevTools is opened via window size monitoring
+  - Layer 4: Console deterrent with Function.prototype.toString override
+  - Layer 5: Image drag prevention and text selection blocking
+  - Layer 6: Escalating response after 3+ detection attempts (shows blocked page)
+  - Only active in production build
+
+- **Backend Security Middleware** (`backend/app/security_middleware.py`)
+  - Security headers on all responses (CSP, HSTS, X-Frame-Options, etc.)
+  - Comprehensive rate limiting with per-endpoint limits
+  - SQL injection and XSS pattern detection
+  - Bot detection with User-Agent validation
+  - Security event logging and statistics
+  - IP blocking capability
+  - Request audit logging
+
+- **Security Headers Middleware**
+  - X-Content-Type-Options: nosniff
+  - X-XSS-Protection: 1; mode=block
+  - X-Frame-Options: DENY
+  - Content-Security-Policy
+  - Strict-Transport-Security
+  - Referrer-Policy
+  - Permissions-Policy
+  - Cache-Control for sensitive pages
+
+- **Request Validation Middleware**
+  - Missing User-Agent detection
+  - Suspicious URL pattern detection
+  - Request timing and audit logging
+  - Rate limit headers on responses
+
+- **Security Monitoring Endpoints**
+  - GET /api/admin/security/stats - Security events overview
+  - GET /api/admin/security/bot-stats - Bot detection stats
+  - GET /api/admin/security/rate-limit-stats - Rate limiting stats
+
+- **Security Documentation** (`docs/SECURITY.md`)
+  - Comprehensive security architecture documentation
+  - Layer-by-layer security explanation
+  - Testing procedures
+  - Deployment checklist
+  - Limitations and reality check
+
+### Security Notes
+
+**Frontend Security Reality:**
+- Frontend protections are DETERRENT ONLY
+- DevTools cannot be fully blocked (browser limitation)
+- JavaScript in browser is always inspectable
+- Real security is BACKEND authorization + validation
+- Never expose sensitive data to frontend
+
+**What Frontend Security CAN Do:**
+- ✅ Deter casual inspection
+- ✅ Make scraping harder
+- ✅ Block accidental DevTools opening
+- ✅ Create psychological barrier
+- ✅ Log suspicious activity
+
+**Real Security Depends On:**
+- ✅ Backend validates ALL user input
+- ✅ API endpoints check permissions
+- ✅ Rate limiting is enforced
+- ✅ SQL injection is prevented
+- ✅ Sensitive data is not exposed in API
+
+## [2.1.1] - 2026-07-19
+
+### Added
+
+#### Frontend Security
+- **SecurityGuard component** - Frontend inspect deterrent
+  - Blocks right-click context menu in production
+  - Blocks common DevTools shortcuts (F12, Ctrl+Shift+I, Ctrl+Shift+J, etc.)
+  - Blocks image drag-to-save
+  - Only active in production (import.meta.env.PROD === true)
+  - Does not break normal form input/typing
+
+- **Source map disabled** in production builds
+  - No .map files generated
+  - Terser minification with console/debugger removal
+
+#### Backend Security
+- **Rate limiting** on public API endpoints
+  - Public listing endpoints: 60 requests/minute/IP
+  - Login/Register: 10 requests/minute/IP
+  - Service detail: 120 requests/minute/IP
+  - Returns 429 with proper headers when exceeded
+
+- **Bot detection middleware** (basic logging)
+  - Logs requests with missing User-Agent
+  - Tracks high-frequency requests
+  - Honeypot route detection
+  - Security stats endpoint: /api/admin/security/stats
+
+- **robots.txt** added
+  - Disallows /api/, /app/admin, /app/seller, /app/checkout, /auth/
+  - Allows public browse/search pages
+
+#### Admin Features
+- **CRUD User Management**
+  - Create user via admin panel
+  - Delete user via admin panel
+  - Updated role management
+  - User deletion confirmation modal
+
+- **Customer Service Admin Improvements**
+  - Role badge displayed on CS thread list
+  - Better visibility of buyer vs seller threads
+  - user_role field added to thread responses
+
+### Security Notes
+- Created docs/SECURITY_NOTES.md documenting:
+  - Frontend deterrent limitations
+  - Backend protection measures
+  - Production deployment recommendations
+  - What stakeholders can/cannot expect
+
+### Dependencies
+- Added terser for minification
+- Added esbuild dependency
+- Added pytest-asyncio for testing
+- Added httpx for async test client
+
+## [2.0.0] - 2026-07-19
+
+### Added
+- FastAPI backend with Clean Architecture
+- React + Vite frontend
+- User authentication with JWT
 - Marketplace features (services, categories, orders)
-- User profile and settings
+- Customer service functionality
+- Admin dashboard with user management
+- Buyer and seller dashboards
+
+### Backend Endpoints
+- Authentication: /api/auth/register, /api/auth/login
+- Services: /api/services, /api/services/{id}
+- Categories: /api/categories
+- Orders: /api/orders, /api/orders/{id}
+- Saved Services: /api/saved
+- Messages: /api/messages
+- Profile: /api/profile
+- Payments: /api/payments
+- Admin: /api/admin/users, /api/admin/customer-service/*
+
+### Frontend Pages
+- Home with hero video
+- Search/marketplace
+- Category pages
+- Service detail
+- Checkout flow
+- Orders page
+- Saved services
+- Profile management
+- Buyer/seller/admin dashboards
+
+## [1.0.0] - 2026-01-01
+
+### Added
+- Initial project setup
+- Basic structure

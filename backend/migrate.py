@@ -118,7 +118,45 @@ def migrate():
         else:
             print("Admin user already exists: " + admin.email)
 
-        # 7. Set all existing users to is_active=True if column was just added
+        # 7. Create buyer user if not exists
+        buyer = db.query(User).filter(User.email == 'fery@remotiva.id').first()
+        if not buyer:
+            print("Creating buyer user...")
+            password_hash = hash_password('password')
+            buyer = User(
+                name='Fery Firdaus',
+                email='fery@remotiva.id',
+                password_hash=password_hash,
+                role='buyer',
+                is_active=True,
+                seller_level='Klien Aktif'
+            )
+            db.add(buyer)
+            db.commit()
+            print("[OK] Created buyer user")
+        else:
+            print("Buyer user already exists: " + buyer.email)
+
+        # 8. Create seller user if not exists
+        seller = db.query(User).filter(User.email == 'nadia@remotiva.id').first()
+        if not seller:
+            print("Creating seller user...")
+            password_hash = hash_password('password')
+            seller = User(
+                name='Nadia Studio',
+                email='nadia@remotiva.id',
+                password_hash=password_hash,
+                role='seller',
+                is_active=True,
+                seller_level='Top Rated'
+            )
+            db.add(seller)
+            db.commit()
+            print("[OK] Created seller user")
+        else:
+            print("Seller user already exists: " + seller.email)
+
+        # 9. Set all existing users to is_active=True if column was just added
         with engine.connect() as conn:
             conn.execute(text("UPDATE users SET is_active = TRUE WHERE is_active IS NULL OR is_active = FALSE"))
             conn.commit()

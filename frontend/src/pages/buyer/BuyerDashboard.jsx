@@ -15,6 +15,20 @@ import { useLanguage } from '../../i18n/LanguageContext'
 import '../../components/customer-service/CustomerService.css'
 
 export default function BuyerDashboard() {
+  const dashboard = {
+  buyerTitle: "Beranda Pembeli",
+  marketplace: "Marketplace Freelancer",
+  savedServices: "Layanan Tersimpan",
+  orders: "Pesanan",
+  activeOrders: "Pesanan Aktif",
+  completedOrders: "Pesanan Selesai",
+  pendingOrders: "Pesanan Menunggu",
+  customerService: "Bantuan Pelanggan",
+  recommendedServices: "Layanan Rekomendasi",
+  recentOrders: "Pesanan Terbaru",
+  noOrdersYet: "Belum ada pesanan",
+  searchPlaceholder: "Cari layanan yang Anda butuhkan...",
+};
   const navigate = useNavigate()
   const [categories, setCategories] = useState([])
   const [services, setServices] = useState([])

@@ -55,6 +55,8 @@ export const api = {
 
   // Admin
   adminUsers: () => request('/admin/users'),
+  adminCreateUser: data => request('/admin/users', { method: 'POST', body: JSON.stringify(data) }),
+  adminDeleteUser: id => request(`/admin/users/${id}`, { method: 'DELETE' }),
   adminToggleUser: id => request(`/admin/users/${id}/toggle-active`, { method: 'PATCH' }),
   adminUpdateRole: (id, data) => request(`/admin/users/${id}/role`, { method: 'PATCH', body: JSON.stringify(data) }),
   adminCsThreads: (status) => {

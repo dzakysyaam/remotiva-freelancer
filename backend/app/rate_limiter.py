@@ -6,6 +6,7 @@ For production, consider using Redis-based rate limiting with slowapi or custom 
 """
 
 import time
+import os
 from collections import defaultdict
 from typing import Callable, Dict, List, Tuple
 from fastapi import Request, Response
@@ -13,6 +14,9 @@ from fastapi.responses import JSONResponse
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Disable rate limiter for testing
+DISABLE_RATE_LIMIT = os.environ.get("DISABLE_RATE_LIMIT", "false").lower() in ("true", "1", "yes")
 
 
 class RateLimiter:
@@ -75,6 +79,10 @@ class RateLimiter:
         Returns:
             Tuple of (is_allowed, response_if_not_allowed)
         """
+        # Skip rate limiting for testing
+        if DISABLE_RATE_LIMIT:
+            return True, None
+
         self._cleanup_old_entries()
 
         ip = self._get_client_ip(request)

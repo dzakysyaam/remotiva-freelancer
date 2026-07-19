@@ -17,6 +17,8 @@
     "vite": "latest"
   },
   "devDependencies": {
-    "@rolldown/binding-win32-x64-msvc": "^1.1.5"
+    "@rolldown/binding-win32-x64-msvc": "^1.1.5",
+    "esbuild": "^0.28.1",
+    "terser": "^5.49.0"
   }
 }

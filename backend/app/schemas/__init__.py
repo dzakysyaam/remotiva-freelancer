@@ -165,6 +165,7 @@ class CSThreadResponse(BaseModel):
     id: int
     user_id: int
     user_name: Optional[str] = None
+    user_role: Optional[str] = None
     subject: str
     status: str
     created_at: datetime
@@ -216,6 +217,17 @@ class UserRoleUpdate(BaseModel):
 class UserToggleResponse(BaseModel):
     id: int
     is_active: bool
+
+
+class UserCreateRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=255)
+    email: str = Field(..., min_length=5)
+    password: str = Field(..., min_length=6)
+    role: str = Field(default="buyer")
+
+
+class UserDeleteResponse(BaseModel):
+    message: str
 
 
 # Health

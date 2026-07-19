@@ -39,14 +39,75 @@ function CustomerServicePopup({ onClose }) {
   const [inputValue, setInputValue] = useState('')
   const [sending, setSending] = useState(false)
   const [threadId, setThreadId] = useState(null)
+  const [threads, setThreads] = useState([])
+  const [showThreadList, setShowThreadList] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
   const currentUser = session.user
+  const currentUserRole = currentUser?.role || 'buyer'
 
+  // Load existing threads on mount
   useEffect(() => {
-    // Show welcome message if no messages
-    if (messages.length === 0) {
+    loadThreads()
+  }, [])
+
+  async function loadThreads() {
+    setIsLoading(true)
+    try {
+      const myThreads = await api.csThreads()
+      setThreads(myThreads)
+      if (myThreads.length > 0) {
+        // Open the most recent thread
+        const latestThread = myThreads[0]
+        setThreadId(latestThread.id)
+        await loadMessages(latestThread.id)
+      } else {
+        // No threads, show welcome
+        setMessages([{
+          id: 'welcome',
+          sender_role: 'admin',
+          sender_name: 'CS Remotiva',
+          message: customerService.welcomeMessage,
+          created_at: new Date().toISOString(),
+          isWelcome: true
+        }])
+      }
+    } catch (err) {
+      console.error('Failed to load threads:', err)
+      // Show welcome on error
+      setMessages([{
+        id: 'welcome',
+        sender_role: 'admin',
+        sender_name: 'CS Remotiva',
+        message: customerService.welcomeMessage,
+        created_at: new Date().toISOString(),
+        isWelcome: true
+      }])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function loadMessages(tid) {
+    try {
+      const msgs = await api.getCsThreadMessages(tid)
+      if (msgs.length === 0) {
+        // Add welcome message if no messages
+        setMessages([{
+          id: 'welcome',
+          sender_role: 'admin',
+          sender_name: 'CS Remotiva',
+          message: customerService.welcomeMessage,
+          created_at: new Date().toISOString(),
+          isWelcome: true
+        }])
+      } else {
+        setMessages(msgs)
+      }
+    } catch (err) {
+      console.error('Failed to load messages:', err)
       setMessages([{
         id: 'welcome',
         sender_role: 'admin',
@@ -56,7 +117,7 @@ function CustomerServicePopup({ onClose }) {
         isWelcome: true
       }])
     }
-  }, [])
+  }
 
   useEffect(() => {
     // Listen for global open event
@@ -82,44 +143,37 @@ function CustomerServicePopup({ onClose }) {
     setInputValue('')
     setSending(true)
 
-    // Add user message immediately to UI
-    const userMsg = {
-      id: 'temp-' + Date.now(),
-      sender_role: 'buyer',
-      sender_name: currentUser?.name || 'Anda',
-      message: messageText,
-      created_at: new Date().toISOString(),
-      isUser: true
-    }
-    setMessages(prev => [...prev, userMsg])
-
     try {
+      let tid = threadId
+
       // If no thread exists, create one first
-      if (!threadId) {
+      if (!tid) {
         const subject = messageText.substring(0, 40) + (messageText.length > 40 ? '...' : '')
         const thread = await api.createCsThread({ subject })
-        setThreadId(thread.id)
+        tid = thread.id
+        setThreadId(tid)
+        // Refresh threads list
+        await loadThreads()
       }
 
       // Send the message
-      await api.sendCsMessage(threadId, { message: messageText })
+      await api.sendCsMessage(tid, { message: messageText })
 
       // Reload messages to get proper IDs from backend
-      if (threadId) {
-        const updatedMessages = await api.getCsThreadMessages(threadId)
-        // Replace temp messages with real ones, keep welcome message
-        setMessages(prev => {
-          const welcome = prev.find(m => m.isWelcome)
-          const userMsgs = updatedMessages.filter(m => m.sender_role === 'buyer')
-          return welcome ? [welcome, ...userMsgs] : updatedMessages
-        })
-      }
+      await loadMessages(tid)
     } catch (err) {
       console.error('Failed to send message:', err)
-      // Keep the message visible even if send failed
+      // Restore message on error
+      setInputValue(messageText)
     } finally {
       setSending(false)
     }
+  }
+
+  function handleSelectThread(tid) {
+    setThreadId(tid)
+    loadMessages(tid)
+    setShowThreadList(false)
   }
 
   function formatTime(dateStr) {
@@ -138,13 +192,49 @@ function CustomerServicePopup({ onClose }) {
             </div>
             <span>{customerService.subtitle}</span>
           </div>
-          <button className="customer-chat-close" onClick={onClose}>
-            <X size={18} />
-          </button>
+          <div className="cs-header-actions">
+            {threads.length > 0 && (
+              <button
+                className="cs-thread-toggle"
+                onClick={() => setShowThreadList(!showThreadList)}
+                title="Lihat percakapan"
+              >
+                {threads.length} percakapan
+              </button>
+            )}
+            <button className="customer-chat-close" onClick={onClose}>
+              <X size={18} />
+            </button>
+          </div>
         </header>
 
+        {showThreadList && (
+          <div className="cs-thread-selector">
+            <div className="cs-thread-selector-header">
+              <span>{customerService.allThreads}</span>
+              <button onClick={loadThreads} className="cs-refresh-btn">↻</button>
+            </div>
+            <div className="cs-thread-list-popup">
+              {threads.map(thread => (
+                <div
+                  key={thread.id}
+                  className={`cs-thread-item ${threadId === thread.id ? 'active' : ''}`}
+                  onClick={() => handleSelectThread(thread.id)}
+                >
+                  <div className="cs-thread-subject">{thread.subject}</div>
+                  {thread.last_message && (
+                    <div className="cs-thread-preview">{thread.last_message}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="customer-chat-body">
-          {messages.map(msg => (
+          {isLoading ? (
+            <div className="cs-loading">Memuat...</div>
+          ) : messages.map(msg => (
             <div
               key={msg.id}
               className={`chat-message ${msg.isWelcome || msg.sender_role === 'admin' ? 'chat-message-support' : 'chat-message-user'}`}

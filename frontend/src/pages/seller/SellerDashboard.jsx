@@ -57,6 +57,22 @@ const mockSellerServices = [
 ]
 
 export default function SellerDashboard() {
+  const dashboard = {
+  sellerTitle: "Ruang Kerja Freelancer",
+  totalEarnings: "Total Pendapatan",
+  totalOrders: "Total Pesanan",
+  activeOrders: "Pesanan Aktif",
+  completed: "Selesai",
+  completedOrders: "Pesanan Selesai",
+  incomingOrders: "Pesanan Masuk",
+  customerService: "Bantuan Pelanggan",
+  analytics: "Analitik",
+  settings: "Pengaturan",
+  myServices: "Layanan Saya",
+  addNewService: "Tambah Layanan Baru",
+  recentOrders: "Pesanan Terbaru",
+  noOrdersYet: "Belum ada pesanan",
+};
   const navigate = useNavigate()
   const [stats, setStats] = useState({
     totalOrders: 0,

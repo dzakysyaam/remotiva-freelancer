@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   Users, Package, CreditCard, Settings,
   UserCheck, UserX, Shield, TrendingUp, Clock,
-  ChevronDown, RefreshCw, MessageCircle, Filter
+  ChevronDown, RefreshCw, MessageCircle, Filter,
+  Plus, Trash2, X
 } from 'lucide-react'
 import { api, session } from '../../lib/api'
 import { CustomerServiceButton } from '../../components/customer-service/CustomerServiceButton'
@@ -14,6 +15,40 @@ import { useLanguage } from '../../i18n/LanguageContext'
 import '../../components/customer-service/CustomerService.css'
 
 export default function AdminDashboard() {
+  const dashboard = {
+  userManagement: "Kelola Pengguna",
+  users: "Kelola Pengguna",
+  orders: "Pesanan",
+  payments: "Pembayaran",
+  customerService: "Bantuan Pelanggan",
+  support: "Bantuan Pelanggan",
+  totalUsers: "Total Pengguna",
+  activeUsers: "Pengguna Aktif",
+  inactiveUsers: "Pengguna Nonaktif",
+  totalOrders: "Total Pesanan",
+  activeOrders: "Pesanan Aktif",
+  completedOrders: "Pesanan Selesai",
+  pendingOrders: "Pesanan Menunggu",
+  totalPayments: "Total Pembayaran",
+  pendingPayments: "Pembayaran Menunggu",
+  totalRevenue: "Total Pendapatan",
+  recentOrders: "Pesanan Terbaru",
+  noOrdersYet: "Belum ada pesanan",
+  noUsersYet: "Belum ada pengguna",
+  noPaymentsYet: "Belum ada pembayaran",
+  noConversationsYet: "Belum ada percakapan",
+  selectConversation: "Pilih percakapan untuk melihat detail pesan",
+  createUser: "Tambah Pengguna",
+  editUser: "Edit Pengguna",
+  deleteUser: "Hapus Pengguna",
+  confirmDelete: "Apakah Anda yakin ingin menghapus pengguna ini?",
+  name: "Nama",
+  email: "Email",
+  password: "Kata Sandi",
+  role: "Peran",
+  cancel: "Batal",
+  save: "Simpan",
+};
   const navigate = useNavigate()
   const { t } = useLanguage()
   const [users, setUsers] = useState([])
@@ -28,6 +63,17 @@ export default function AdminDashboard() {
   const [csReply, setCsReply] = useState('')
   const [loading, setLoading] = useState(true)
 
+  // Create User Modal State
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'buyer' })
+  const [createError, setCreateError] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  // Delete User Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [userToDelete, setUserToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+
   useEffect(() => {
     const user = session.user
     if (!user || user.role !== 'admin') {
@@ -37,6 +83,13 @@ export default function AdminDashboard() {
 
     loadData()
   }, [])
+
+  // Load CS threads when CS tab is active
+  useEffect(() => {
+    if (activeTab === 'cs') {
+      loadCsThreads()
+    }
+  }, [activeTab])
 
   async function loadData() {
     setLoading(true)
@@ -88,6 +141,50 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Failed to update role:', err)
       alert('Gagal mengubah peran')
+    }
+  }
+
+  async function handleCreateUser(e) {
+    e.preventDefault()
+    setCreateError('')
+
+    if (!newUser.name || !newUser.email || !newUser.password) {
+      setCreateError('Semua field wajib diisi')
+      return
+    }
+
+    setCreating(true)
+    try {
+      const createdUser = await api.adminCreateUser(newUser)
+      setUsers([createdUser, ...users])
+      setShowCreateModal(false)
+      setNewUser({ name: '', email: '', password: '', role: 'buyer' })
+    } catch (err) {
+      console.error('Failed to create user:', err)
+      setCreateError(err.message || 'Gagal membuat pengguna')
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  function openDeleteModal(user) {
+    setUserToDelete(user)
+    setShowDeleteModal(true)
+  }
+
+  async function handleDeleteUser() {
+    if (!userToDelete) return
+    setDeleting(true)
+    try {
+      await api.adminDeleteUser(userToDelete.id)
+      setUsers(users.filter(u => u.id !== userToDelete.id))
+      setShowDeleteModal(false)
+      setUserToDelete(null)
+    } catch (err) {
+      console.error('Failed to delete user:', err)
+      alert(err.message || 'Gagal menghapus pengguna')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -221,7 +318,7 @@ export default function AdminDashboard() {
           className={`dashboard-tab ${activeTab === 'orders' ? 'active' : ''}`}
           onClick={() => setActiveTab('orders')}
         >
-          <Package size={16} /> {t("dashboard.payments") || "Pesanan"}
+          <Package size={16} /> Pesanan
         </button>
         <button
           className={`dashboard-tab ${activeTab === 'payments' ? 'active' : ''}`}
@@ -249,6 +346,11 @@ export default function AdminDashboard() {
           <>
             {activeTab === 'users' && (
               <div className="users-tab">
+                <div className="users-tab-header">
+                  <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+                    <Plus size={16} /> {dashboard.createUser}
+                  </button>
+                </div>
                 <div className="users-table-container">
                   <table className="users-table">
                     <thead>
@@ -301,13 +403,23 @@ export default function AdminDashboard() {
                           </td>
                           <td>{new Date(user.created_at).toLocaleDateString('id-ID')}</td>
                           <td>
-                            <button
-                              className={`toggle-btn ${user.is_active ? 'deactivate' : 'activate'}`}
-                              onClick={() => handleToggleActive(user.id)}
-                              disabled={user.id === currentUser?.id}
-                            >
-                              {user.is_active ? admin.deactivate : admin.activate}
-                            </button>
+                            <div className="action-buttons">
+                              <button
+                                className={`toggle-btn ${user.is_active ? 'deactivate' : 'activate'}`}
+                                onClick={() => handleToggleActive(user.id)}
+                                disabled={user.id === currentUser?.id}
+                              >
+                                {user.is_active ? admin.deactivate : admin.activate}
+                              </button>
+                              <button
+                                className="delete-btn"
+                                onClick={() => openDeleteModal(user)}
+                                disabled={user.id === currentUser?.id}
+                                title={dashboard.deleteUser}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -441,7 +553,12 @@ export default function AdminDashboard() {
                                 {new Date(thread.updated_at).toLocaleDateString('id-ID')}
                               </span>
                             </div>
-                            <div className="cs-thread-user">{thread.user_name}</div>
+                            <div className="cs-thread-user-row">
+                              <span className="cs-thread-user">{thread.user_name}</span>
+                              <span className={`cs-thread-role-badge ${thread.user_role}`}>
+                                {formatRole(thread.user_role)}
+                              </span>
+                            </div>
                             <div className="cs-thread-subject">{thread.subject}</div>
                             {thread.last_message && (
                               <div className="cs-thread-preview">{thread.last_message}</div>
@@ -519,6 +636,106 @@ export default function AdminDashboard() {
 
         {/* Customer Service Button */}
         <CustomerServiceButton />
+
+        {/* Create User Modal */}
+        {showCreateModal && (
+          <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>{dashboard.createUser}</h3>
+                <button className="modal-close" onClick={() => setShowCreateModal(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <form onSubmit={handleCreateUser}>
+                <div className="modal-body">
+                  {createError && (
+                    <div className="error-message">{createError}</div>
+                  )}
+                  <div className="form-group">
+                    <label>{dashboard.name}</label>
+                    <input
+                      type="text"
+                      value={newUser.name}
+                      onChange={e => setNewUser({...newUser, name: e.target.value})}
+                      placeholder="Masukkan nama lengkap"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>{dashboard.email}</label>
+                    <input
+                      type="email"
+                      value={newUser.email}
+                      onChange={e => setNewUser({...newUser, email: e.target.value})}
+                      placeholder="Masukkan email"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>{dashboard.password}</label>
+                    <input
+                      type="password"
+                      value={newUser.password}
+                      onChange={e => setNewUser({...newUser, password: e.target.value})}
+                      placeholder="Masukkan kata sandi (min 6 karakter)"
+                      minLength={6}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>{dashboard.role}</label>
+                    <select
+                      value={newUser.role}
+                      onChange={e => setNewUser({...newUser, role: e.target.value})}
+                    >
+                      <option value="buyer">Pembeli</option>
+                      <option value="seller">Penjual</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowCreateModal(false)}>
+                    {dashboard.cancel}
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={creating}>
+                    {creating ? 'Menyimpan...' : dashboard.save}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete User Confirmation Modal */}
+        {showDeleteModal && userToDelete && (
+          <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+            <div className="modal-content modal-content-sm" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>{dashboard.deleteUser}</h3>
+                <button className="modal-close" onClick={() => setShowDeleteModal(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal-body">
+                <p>{dashboard.confirmDelete}</p>
+                <div className="delete-user-info">
+                  <strong>{userToDelete.name}</strong>
+                  <span>{userToDelete.email}</span>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setShowDeleteModal(false)}>
+                  {dashboard.cancel}
+                </button>
+                <button className="btn btn-danger" onClick={handleDeleteUser} disabled={deleting}>
+                  {deleting ? 'Menghapus...' : dashboard.deleteUser}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -938,6 +1155,36 @@ export default function AdminDashboard() {
           margin-bottom: 4px;
         }
 
+        .cs-thread-user-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 4px;
+        }
+
+        .cs-thread-role-badge {
+          font-size: 0.65rem;
+          font-weight: 600;
+          padding: 2px 6px;
+          border-radius: 4px;
+          text-transform: uppercase;
+        }
+
+        .cs-thread-role-badge.buyer {
+          background: #DBEAFE;
+          color: #1E40AF;
+        }
+
+        .cs-thread-role-badge.seller {
+          background: #D1FAE5;
+          color: #065F46;
+        }
+
+        .cs-thread-role-badge.admin {
+          background: #FEE2E2;
+          color: #991B1B;
+        }
+
         .cs-thread-subject {
           font-size: 0.85rem;
           color: #0f172a;
@@ -1124,6 +1371,183 @@ export default function AdminDashboard() {
         .btn-sm {
           padding: 6px 10px;
           font-size: 0.8rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 20px;
+        }
+
+        .modal-content {
+          background: white;
+          border-radius: 12px;
+          width: 100%;
+          max-width: 480px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content-sm {
+          max-width: 400px;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 24px;
+          border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-header h3 {
+          margin: 0;
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        .modal-close {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #64748b;
+          padding: 4px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-close:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+        }
+
+        .modal-body {
+          padding: 24px;
+        }
+
+        .modal-footer {
+          display: flex;
+          justify-content: flex-end;
+          gap: 12px;
+          padding: 16px 24px;
+          border-top: 1px solid #e2e8f0;
+          background: #f8fafc;
+          border-radius: 0 0 12px 12px;
+        }
+
+        .form-group {
+          margin-bottom: 16px;
+        }
+
+        .form-group label {
+          display: block;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          transition: border-color 0.2s;
+          box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: #2D76FF;
+          box-shadow: 0 0 0 3px rgba(45, 118, 255, 0.1);
+        }
+
+        .error-message {
+          background: #fee2e2;
+          color: #991b1b;
+          padding: 10px 14px;
+          border-radius: 8px;
+          font-size: 0.85rem;
+          margin-bottom: 16px;
+        }
+
+        .delete-user-info {
+          background: #f8fafc;
+          padding: 16px;
+          border-radius: 8px;
+          margin-top: 12px;
+        }
+
+        .delete-user-info strong {
+          display: block;
+          color: #0f172a;
+          margin-bottom: 4px;
+        }
+
+        .delete-user-info span {
+          font-size: 0.85rem;
+          color: #64748b;
+        }
+
+        .btn-danger {
+          background: #DC2626;
+          color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+          background: #B91C1C;
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 8px;
+        }
+
+        .delete-btn {
+          padding: 6px 10px;
+          border-radius: 6px;
+          font-size: 0.8rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+          background: #fee2e2;
+          color: #991b1b;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .delete-btn:hover:not(:disabled) {
+          background: #fecaca;
+        }
+
+        .delete-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .users-tab-header {
+          display: flex;
+          justify-content: flex-end;
+          padding: 16px 20px;
+          border-bottom: 1px solid #f1f5f9;
         }
 
         @media (max-width: 1200px) {

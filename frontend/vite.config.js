@@ -12,7 +12,13 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       sourcemap: false,
-      minify: "esbuild",
+      minify: "terser",
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+        },
+      },
     },
     esbuild: isProduction
       ? {
