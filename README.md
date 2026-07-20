@@ -3,7 +3,7 @@ Remotiva is a professional freelance marketplace web platform that connects clie
 
 ## Tech Stack
 - **Frontend**: React + Vite, React Router, Lucide React Icons
-- **Backend**: Go (net/http), Clean layered architecture
+- **Backend**: Python, Clean layered architecture
 - **Database**: MySQL
 - **Database Name**: `remotiva_db`
 
